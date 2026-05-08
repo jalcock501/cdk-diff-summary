@@ -33,6 +33,8 @@ The action deliberately shows changed field paths only, not before/after values,
 
 ## Example Output
 
+![Screenshot of a larger CDK diff summary in GitHub Step Summary](docs/assets/cdk-diff-summary-larger-example.png)
+
 ```markdown
 ## CDK diff summary
 
