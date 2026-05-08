@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Run pytest
+        run: poetry run test
+
+      - name: Run ruff
+        run: poetry run ruff check .
+
+      - name: Prepare smoke fixture
+        run: |
+          cat > cdk-diff-smoke.json <<'JSON'
+          {
+            "stacks": [
+              {
+                "stackName": "SmokeStack",
+                "resources": [
+                  {
+                    "logicalId": "SmokeFunction",
+                    "resourceType": "AWS::Lambda::Function",
+                    "action": "modify",
+                    "propertyChanges": [
+                      { "path": "Runtime" },
+                      { "path": "Code.S3Key" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+          JSON
+
+      - name: Action smoke test
+        uses: ./
+        with:
+          diff-json-path: cdk-diff-smoke.json
+          summary-output-path: smoke-summary.md
+
+      - name: Verify smoke summary
+        run: grep -q "SmokeFunction" smoke-summary.md
+
+      - name: Larger example smoke test
+        uses: ./
+        with:
+          diff-json-path: example_cdk_diff_json/cdk-diff-json-large-realistic.json
+          summary-title: CDK diff summary - larger example
+          max-changed-fields: "6"
+          summary-output-path: large-example-summary.md
+
+      - name: Verify larger example summary
+        run: |
+          grep -q "CDK diff summary - larger example" large-example-summary.md
+          grep -q "### Modifies" large-example-summary.md
+
+      - name: Upload larger example summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: large-example-cdk-diff-summary
+          path: large-example-summary.md
+
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run actionlint
+        uses: raven-actions/actionlint@v2

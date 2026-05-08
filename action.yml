@@ -1,0 +1,50 @@
+name: cdk-diff-summary
+description: Summarize AWS CDK diff JSON in GitHub Actions step summaries.
+author: cdk-diff-summary contributors
+inputs:
+  diff-json-path:
+    description: Path to JSON produced by cdk diff --json.
+    required: true
+  summary-title:
+    description: Markdown heading for the summary.
+    required: false
+    default: CDK diff summary
+  max-changed-fields:
+    description: Maximum changed field paths to show for each resource.
+    required: false
+    default: "8"
+  collapse-iam-policies:
+    description: Collapse IAM policy document changes to compact field paths.
+    required: false
+    default: "true"
+  collapse-assets:
+    description: Suppress or collapse common CDK asset/hash churn.
+    required: false
+    default: "true"
+  fail-on-remove:
+    description: Exit non-zero after writing the summary if visible removes exist.
+    required: false
+    default: "false"
+  fail-on-replace:
+    description: Exit non-zero after writing the summary if visible replacements exist.
+    required: false
+    default: "false"
+  summary-output-path:
+    description: Optional path to also append the generated Markdown summary.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Write CDK diff summary
+      shell: bash
+      env:
+        DIFF_JSON_PATH: ${{ inputs.diff-json-path }}
+        SUMMARY_TITLE: ${{ inputs.summary-title }}
+        MAX_CHANGED_FIELDS: ${{ inputs.max-changed-fields }}
+        COLLAPSE_IAM_POLICIES: ${{ inputs.collapse-iam-policies }}
+        COLLAPSE_ASSETS: ${{ inputs.collapse-assets }}
+        FAIL_ON_REMOVE: ${{ inputs.fail-on-remove }}
+        FAIL_ON_REPLACE: ${{ inputs.fail-on-replace }}
+        SUMMARY_OUTPUT_PATH: ${{ inputs.summary-output-path }}
+      run: python "$GITHUB_ACTION_PATH/scripts/cdk_diff_summary.py"

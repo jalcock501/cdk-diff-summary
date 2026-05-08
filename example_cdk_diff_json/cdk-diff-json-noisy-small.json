@@ -1,0 +1,380 @@
+{
+  "metadata": {
+    "tool": "cdk diff",
+    "format": "synthetic-cdk-diff-json",
+    "generatedFor": "test-data",
+    "note": "Synthetic fixture shaped to resemble a plausible JSON form of CDK diff output.",
+    "timestamp": "2026-05-08T12:00:00Z",
+    "region": "eu-west-2",
+    "account": "123456789012"
+  },
+  "summary": {
+    "stacksWithDifferences": 1,
+    "totalAdditions": 0,
+    "totalModifications": 15,
+    "totalDeletions": 0,
+    "totalReplacements": 0,
+    "iamStatementChanges": 0,
+    "securityGroupChanges": 0
+  },
+  "stacks": [
+    {
+      "stackName": "Demo-NoisyStack",
+      "hasDifferences": true,
+      "changeSetMode": "templateOnly",
+      "approvalLevel": "never",
+      "parameters": [],
+      "iamStatementChanges": [],
+      "securityGroupChanges": [],
+      "resources": [
+        {
+          "logicalId": "SyntheticPolicyExcerpt01",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-1:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-1-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt02",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-2:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-2-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt03",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-3:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-3-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt04",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-4:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-4-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt05",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-5:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-5-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt06",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-6:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-6-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt07",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-7:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-7-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt08",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-8:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-8-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt09",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-9:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-9-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt10",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-10:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-10-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt11",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-11:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-11-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt12",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-12:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-12-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt13",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-13:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-13-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt14",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-14:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-14-v2:*"
+            }
+          ]
+        },
+        {
+          "logicalId": "SyntheticPolicyExcerpt15",
+          "resourceType": "AWS::IAM::Policy",
+          "action": "modify",
+          "propertyChanges": [
+            {
+              "path": "PolicyDocument.Statement[0].Action[2]",
+              "changeType": "add",
+              "newValue": "logs:DescribeLogStreams"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Action[3]",
+              "changeType": "add",
+              "newValue": "cloudwatch:PutMetricData"
+            },
+            {
+              "path": "PolicyDocument.Statement[0].Resource",
+              "changeType": "modify",
+              "oldValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-15:*",
+              "newValue": "arn:aws:logs:eu-west-2:123456789012:log-group:/aws/lambda/demo-fn-15-v2:*"
+            }
+          ]
+        }
+      ],
+      "outputs": [],
+      "notices": []
+    }
+  ]
+}

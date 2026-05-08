@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "cdk-diff-summary"
+version = "0.1.0"
+description = "A composite GitHub Action that summarizes AWS CDK diff JSON."
+authors = ["cdk-diff-summary contributors"]
+readme = "README.md"
+packages = [{ include = "cdk_diff_summary", from = "scripts" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+ruff = "^0.8.0"
+
+[tool.poetry.scripts]
+cdk-diff-summary = "cdk_diff_summary.cli:main"
+test = "pytest:console_main"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["scripts"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
