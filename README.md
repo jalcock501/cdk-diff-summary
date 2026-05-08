@@ -20,37 +20,37 @@ The action deliberately shows changed field paths only, not before/after values,
 
 ## Inputs
 
-| Input | Required | Default | Description |
-| --- | --- | --- | --- |
-| `diff-json-path` | yes | | Path to JSON produced by `cdk diff --json`. |
-| `summary-title` | no | `CDK diff summary` | Markdown heading for the summary. |
-| `max-changed-fields` | no | `8` | Maximum changed field paths shown per resource. |
-| `collapse-iam-policies` | no | `true` | Collapse large IAM policy document diffs to a single path such as `PolicyDocument`. |
-| `collapse-assets` | no | `true` | Suppress or collapse common CDK asset/hash churn such as asset hashes, S3 object keys, Lambda code hashes, Docker image asset hashes, and CDK metadata asset paths. |
-| `fail-on-remove` | no | `false` | Write the summary, then fail the step if visible removes exist. |
-| `fail-on-replace` | no | `false` | Write the summary, then fail the step if visible replacements exist. |
-| `summary-output-path` | no | | Optional file path to also append the generated Markdown summary. |
+| Input                   | Required | Default            | Description                                                                                                                                                         |
+| ----------------------- | -------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `diff-json-path`        | yes      |                    | Path to JSON produced by `cdk diff --json`.                                                                                                                         |
+| `summary-title`         | no       | `CDK diff summary` | Markdown heading for the summary.                                                                                                                                   |
+| `max-changed-fields`    | no       | `8`                | Maximum changed field paths shown per resource.                                                                                                                     |
+| `collapse-iam-policies` | no       | `true`             | Collapse large IAM policy document diffs to a single path such as `PolicyDocument`.                                                                                 |
+| `collapse-assets`       | no       | `true`             | Suppress or collapse common CDK asset/hash churn such as asset hashes, S3 object keys, Lambda code hashes, Docker image asset hashes, and CDK metadata asset paths. |
+| `fail-on-remove`        | no       | `false`            | Write the summary, then fail the step if visible removes exist.                                                                                                     |
+| `fail-on-replace`       | no       | `false`            | Write the summary, then fail the step if visible replacements exist.                                                                                                |
+| `summary-output-path`   | no       |                    | Optional file path to also append the generated Markdown summary.                                                                                                   |
 
 ## Example Output
 
 ```markdown
 ## CDK diff summary
 
-| Metric | Count |
-| --- | ---: |
-| Stack changes | 1 |
-| Resource changes | 3 |
-| Adds | 1 |
-| Modifies | 1 |
-| Removes | 0 |
-| Replacements | 1 |
-| Changes shown below | 3 |
+| Metric              | Count |
+| ------------------- | ----: |
+| Stack changes       |     1 |
+| Resource changes    |     3 |
+| Adds                |     1 |
+| Modifies            |     1 |
+| Removes             |     0 |
+| Replacements        |     1 |
+| Changes shown below |     3 |
 
 ### Replacements
 
-| Stack | Logical ID | Action | Resource type | Changed fields |
-| --- | --- | --- | --- | --- |
-| PaymentsStack | Worker | replace | AWS::Lambda::Function | `Architectures[]`, `Layers[]` |
+| Stack         | Logical ID | Action  | Resource type         | Changed fields                |
+| ------------- | ---------- | ------- | --------------------- | ----------------------------- |
+| PaymentsStack | Worker     | replace | AWS::Lambda::Function | `Architectures[]`, `Layers[]` |
 ```
 
 ## Local Development

@@ -1,0 +1,98 @@
+name: Parser failure
+description: Report CDK diff JSON that cdk-diff-summary cannot parse correctly.
+title: "Parser failure: "
+labels:
+  - bug
+  - parser
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve CDK diff compatibility.
+
+        CDK diff JSON can contain sensitive infrastructure values. Please sanitize account IDs, ARNs, hostnames, resource names, secrets, certificates, personal data, and any production identifiers before pasting examples.
+
+  - type: input
+    id: cdk-version
+    attributes:
+      label: CDK version
+      description: Paste the output of `npx cdk --version`, if available.
+      placeholder: "2.189.0 (build abc1234)"
+    validations:
+      required: false
+
+  - type: input
+    id: command
+    attributes:
+      label: Command used to generate the diff JSON
+      description: Include flags that affect output shape.
+      placeholder: "npx cdk diff --json > cdk-diff.json"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: failure-type
+    attributes:
+      label: What went wrong?
+      options:
+        - The action failed with an error
+        - The action completed but missed changes
+        - The action completed but grouped changes incorrectly
+        - The action completed but rendered noisy fields incorrectly
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error output or incorrect summary
+      description: Paste the relevant error message or a sanitized excerpt of the generated summary.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: sanitized-json
+    attributes:
+      label: Sanitized CDK diff JSON shape
+      description: Paste the smallest sanitized JSON example that reproduces the issue.
+      placeholder: |
+        {
+          "stacks": [
+            {
+              "stackName": "ExampleStack",
+              "resources": [
+                {
+                  "logicalId": "ExampleResource",
+                  "resourceType": "AWS::Example::Resource",
+                  "action": "modify",
+                  "propertyChanges": [
+                    { "path": "Example.Field", "changeType": "modify" }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: Describe how the summary should parse, group, or render this diff.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: sanitization
+    attributes:
+      label: Sanitization checklist
+      options:
+        - label: I removed or replaced secrets, tokens, certificates, account IDs, ARNs, hostnames, personal data, and production identifiers.
+          required: true
+        - label: I reduced the JSON to the smallest example that still reproduces the issue.
+          required: true
