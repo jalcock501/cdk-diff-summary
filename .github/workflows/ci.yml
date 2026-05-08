@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -73,7 +73,7 @@ jobs:
           grep -q "### Modifies" large-example-summary.md
 
       - name: Upload larger example summary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: large-example-cdk-diff-summary
           path: large-example-summary.md
