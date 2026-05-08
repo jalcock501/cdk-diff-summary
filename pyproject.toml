@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cdk-diff-summary"
-version = "1.0.0"
+version = "1.1.0"
 description = "A composite GitHub Action that summarizes AWS CDK diff JSON."
 authors = ["cdk-diff-summary contributors"]
 readme = "README.md"
