@@ -10,8 +10,8 @@ packages = [{ include = "cdk_diff_summary", from = "scripts" }]
 python = "^3.11"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.3.0"
-ruff = "^0.8.0"
+pytest = ">=8.3,<10.0"
+ruff = ">=0.8,<0.16"
 
 [tool.poetry.scripts]
 cdk-diff-summary = "cdk_diff_summary.cli:main"
