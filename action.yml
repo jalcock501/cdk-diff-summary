@@ -1,6 +1,9 @@
 name: cdk-diff-summary
 description: Summarize AWS CDK diff JSON in GitHub Actions step summaries.
 author: cdk-diff-summary contributors
+branding:
+  icon: layers
+  color: orange
 inputs:
   diff-json-path:
     description: Path to JSON produced by cdk diff --json.
