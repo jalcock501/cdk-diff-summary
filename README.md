@@ -2,7 +2,7 @@
 
 `cdk-diff-summary` is a standalone composite GitHub Action that reads AWS CDK diff JSON and appends a compact Markdown summary to `$GITHUB_STEP_SUMMARY`.
 
-It is designed for pull requests where raw CDK or CloudFormation diffs are too noisy. The summary groups adds, modifies, removes, replacements, and other changes while reducing common churn from IAM policy documents and CDK asset hashes.
+It is designed for pull requests where raw CDK or CloudFormation diffs are too noisy. The summary groups adds, modifies, removes, replacements, security group rule changes, and other changes while reducing common churn from IAM policy documents and CDK asset hashes.
 
 The action deliberately shows changed field paths only, not before/after values, to avoid exposing sensitive infrastructure values in GitHub summaries.
 
@@ -38,21 +38,28 @@ The action deliberately shows changed field paths only, not before/after values,
 ```markdown
 ## CDK diff summary
 
-| Metric              | Count |
-| ------------------- | ----: |
-| Stack changes       |     1 |
-| Resource changes    |     3 |
-| Adds                |     1 |
-| Modifies            |     1 |
-| Removes             |     0 |
-| Replacements        |     1 |
-| Changes shown below |     3 |
+| Metric                 | Count |
+| ---------------------- | ----: |
+| Stack changes          |     1 |
+| Resource changes       |     3 |
+| Adds                   |     1 |
+| Modifies               |     1 |
+| Removes                |     0 |
+| Replacements           |     1 |
+| Security group changes |     1 |
+| Changes shown below    |     4 |
 
 ### Replacements
 
 | Stack         | Logical ID | Action  | Resource type         | Changed fields                |
 | ------------- | ---------- | ------- | --------------------- | ----------------------------- |
 | PaymentsStack | Worker     | replace | AWS::Lambda::Function | `Architectures[]`, `Layers[]` |
+
+### Security group changes
+
+| Stack         | Security group  | Direction | Protocol | Port | Action |
+| ------------- | --------------- | --------- | -------- | ---- | ------ |
+| PaymentsStack | AppSecurityGroup | ingress   | tcp      | 443  | add    |
 ```
 
 ## Local Development

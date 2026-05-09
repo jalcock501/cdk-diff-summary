@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from cdk_diff_summary.diff import DiffSummary, ResourceChange
+from cdk_diff_summary.diff import DiffSummary, ResourceChange, SecurityGroupChange
 
 GROUP_TITLES = (
     ("replacements", "Replacements"),
@@ -27,7 +27,8 @@ def render_summary(summary: DiffSummary, *, title: str, max_changed_fields: int)
         f"| Modifies | {summary.modifies} |",
         f"| Removes | {summary.removes} |",
         f"| Replacements | {summary.replacements} |",
-        f"| Changes shown below | {len(summary.resources)} |",
+        f"| Security group changes | {len(summary.security_group_changes)} |",
+        f"| Changes shown below | {len(summary.resources) + len(summary.security_group_changes)} |",
         "",
     ]
 
@@ -38,7 +39,11 @@ def render_summary(summary: DiffSummary, *, title: str, max_changed_fields: int)
         lines.extend(render_group(group_title, resources, max_changed_fields=max_changed_fields))
         lines.append("")
 
-    if not summary.resources:
+    if summary.security_group_changes:
+        lines.extend(render_security_group_changes(summary.security_group_changes))
+        lines.append("")
+
+    if not summary.resources and not summary.security_group_changes:
         lines.append("No resource changes found in the CDK diff JSON.")
         lines.append("")
 
@@ -72,6 +77,34 @@ def render_group(
                     resource.action,
                     resource.resource_type,
                     fields,
+                )
+            )
+            + " |"
+        )
+    return lines
+
+
+def render_security_group_changes(
+    changes: Iterable[SecurityGroupChange],
+) -> list[str]:
+    lines = [
+        "### Security group changes",
+        "",
+        "| Stack | Security group | Direction | Protocol | Port | Action |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+    for change in changes:
+        lines.append(
+            "| "
+            + " | ".join(
+                escape_table_cell(value)
+                for value in (
+                    change.stack,
+                    change.security_group,
+                    change.direction,
+                    change.protocol,
+                    change.port,
+                    change.action,
                 )
             )
             + " |"
