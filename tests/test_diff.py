@@ -19,6 +19,7 @@ def test_grouping_adds_modifies_removes_replacements(messy_diff: dict) -> None:
     assert summary.modifies == 2
     assert summary.removes == 1
     assert summary.replacements == 3
+    assert len(summary.security_group_changes) == 2
 
 
 def test_changed_field_paths_do_not_include_values(tiny_diff: dict) -> None:
@@ -80,3 +81,56 @@ def test_asset_collapse_in_resource() -> None:
     summary = parse_diff(document, collapse_assets=True)
 
     assert summary.resources[0].changed_fields == ("Code.S3Key", "Asset.Hash", "Runtime")
+
+
+def test_security_group_changes_are_parsed_without_values() -> None:
+    document = {
+        "stacks": [
+            {
+                "stackName": "NetworkStack",
+                "securityGroupChanges": [
+                    {
+                        "securityGroup": "AppSecurityGroup",
+                        "direction": "ingress",
+                        "protocol": "tcp",
+                        "port": 443,
+                        "action": "add",
+                        "old": None,
+                        "new": "10.0.0.0/16",
+                    },
+                    {
+                        "securityGroup": "DatabaseSecurityGroup",
+                        "direction": "ingress",
+                        "protocol": "tcp",
+                        "port": 5432,
+                        "action": "modify",
+                        "old": "10.0.0.0/16",
+                        "new": "10.1.0.0/16",
+                    },
+                    {
+                        "securityGroup": "LegacySecurityGroup",
+                        "direction": "egress",
+                        "protocol": "tcp",
+                        "port": 25,
+                        "action": "delete",
+                        "old": "0.0.0.0/0",
+                        "new": None,
+                    },
+                ],
+            }
+        ]
+    }
+
+    summary = parse_diff(document)
+
+    assert summary.stack_changes == 1
+    assert [change.action for change in summary.security_group_changes] == [
+        "add",
+        "modify",
+        "remove",
+    ]
+    assert summary.security_group_changes[0].stack == "NetworkStack"
+    assert summary.security_group_changes[0].security_group == "AppSecurityGroup"
+    assert summary.security_group_changes[0].direction == "ingress"
+    assert summary.security_group_changes[0].protocol == "tcp"
+    assert summary.security_group_changes[0].port == "443"
