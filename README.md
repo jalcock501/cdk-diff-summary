@@ -38,16 +38,16 @@ The action deliberately shows changed field paths only, not before/after values,
 ```markdown
 ## CDK diff summary
 
-| Metric              | Count |
-| ------------------- | ----: |
-| Stack changes       |     1 |
-| Resource changes    |     3 |
-| Adds                |     1 |
-| Modifies            |     1 |
-| Removes             |     0 |
-| Replacements        |     1 |
-| Security group changes |  1 |
-| Changes shown below |     4 |
+| Metric                 | Count |
+| ---------------------- | ----: |
+| Stack changes          |     1 |
+| Resource changes       |     3 |
+| Adds                   |     1 |
+| Modifies               |     1 |
+| Removes                |     0 |
+| Replacements           |     1 |
+| Security group changes |     1 |
+| Changes shown below    |     4 |
 
 ### Replacements
 
