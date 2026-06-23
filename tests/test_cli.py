@@ -98,12 +98,32 @@ def test_fail_on_remove_writes_summary_then_fails(tmp_path: Path) -> None:
     assert "### Removes" in output_path.read_text(encoding="utf-8")
 
 
+def test_no_fail_on_remove_overrides_environment(monkeypatch, tmp_path: Path) -> None:
+    diff_path = tmp_path / "diff.json"
+    output_path = tmp_path / "summary.md"
+    write_diff(diff_path, action="delete")
+    monkeypatch.setenv("FAIL_ON_REMOVE", "true")
+
+    assert cli.main([str(diff_path), "--output", str(output_path), "--no-fail-on-remove"]) == 0
+    assert "### Removes" in output_path.read_text(encoding="utf-8")
+
+
 def test_fail_on_replace_writes_summary_then_fails(tmp_path: Path) -> None:
     diff_path = tmp_path / "diff.json"
     output_path = tmp_path / "summary.md"
     write_diff(diff_path, replacement=True)
 
     assert cli.main([str(diff_path), "--output", str(output_path), "--fail-on-replace"]) == 3
+    assert "### Replacements" in output_path.read_text(encoding="utf-8")
+
+
+def test_no_fail_on_replace_overrides_environment(monkeypatch, tmp_path: Path) -> None:
+    diff_path = tmp_path / "diff.json"
+    output_path = tmp_path / "summary.md"
+    write_diff(diff_path, replacement=True)
+    monkeypatch.setenv("FAIL_ON_REPLACE", "true")
+
+    assert cli.main([str(diff_path), "--output", str(output_path), "--no-fail-on-replace"]) == 0
     assert "### Replacements" in output_path.read_text(encoding="utf-8")
 
 

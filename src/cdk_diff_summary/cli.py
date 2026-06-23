@@ -77,13 +77,13 @@ def parse_args(argv: list[str] | None = None) -> CliConfig:
     )
     parser.add_argument(
         "--fail-on-remove",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=parse_bool(environ.get("FAIL_ON_REMOVE"), default=False),
         help="Exit non-zero after writing the summary if visible removes exist.",
     )
     parser.add_argument(
         "--fail-on-replace",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=parse_bool(environ.get("FAIL_ON_REPLACE"), default=False),
         help="Exit non-zero after writing the summary if visible replacements exist.",
     )

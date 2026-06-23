@@ -87,8 +87,8 @@ cdk-diff-summary cdk-diff.json --fail-on-remove --fail-on-replace
 | `--max-changed-fields` | Maximum changed field paths shown per resource. Defaults to `8`. |
 | `--collapse-iam-policies` / `--no-collapse-iam-policies` | Collapse large IAM policy document diffs to compact paths. Enabled by default. |
 | `--collapse-assets` / `--no-collapse-assets` | Collapse common CDK asset/hash churn. Enabled by default. |
-| `--fail-on-remove` | Write the summary, then exit non-zero if visible resource removes exist. |
-| `--fail-on-replace` | Write the summary, then exit non-zero if visible resource replacements exist. |
+| `--fail-on-remove` / `--no-fail-on-remove` | Write the summary, then exit non-zero if visible resource removes exist. Disabled by default. |
+| `--fail-on-replace` / `--no-fail-on-replace` | Write the summary, then exit non-zero if visible resource replacements exist. Disabled by default. |
 | `--output` | Optional path to append the generated Markdown summary. |
 | `--github-step-summary` | Optional path to append GitHub Step Summary Markdown. Defaults to `$GITHUB_STEP_SUMMARY`. |
 
