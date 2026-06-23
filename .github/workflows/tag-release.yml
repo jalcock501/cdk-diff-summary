@@ -48,7 +48,7 @@ jobs:
           from pathlib import Path
 
           pyproject = tomllib.loads(Path("pyproject.toml").read_text())
-          version = pyproject["tool"]["poetry"]["version"]
+          version = pyproject["project"]["version"]
           print(f"version={version}")
           print(f"base_tag=v{version}")
           PY
