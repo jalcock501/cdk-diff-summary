@@ -15,19 +15,30 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Poetry
-        run: pipx install poetry
-
-      - name: Install dependencies
-        run: poetry install
+      - name: Install package with dev dependencies
+        run: python -m pip install -e ".[dev]"
 
       - name: Run pytest
-        run: poetry run test
+        run: python -m pytest
 
       - name: Run ruff
-        run: poetry run ruff check .
+        run: ruff check .
 
-      - name: Prepare smoke fixture
+      - name: Build package
+        run: python -m build
+
+      - name: Check package metadata
+        run: twine check dist/*
+
+      - name: CLI smoke test
+        run: |
+          cdk-diff-summary \
+            example_cdk_diff_json/cdk-diff-json-large-realistic.json \
+            --title "CDK diff summary - CLI smoke" \
+            --output cli-smoke-summary.md
+          grep -q "Security group changes" cli-smoke-summary.md
+
+      - name: Prepare action smoke fixture
         run: |
           cat > cdk-diff-smoke.json <<'JSON'
           {
@@ -50,16 +61,16 @@ jobs:
           }
           JSON
 
-      - name: Action smoke test
+      - name: Composite action smoke test
         uses: ./
         with:
           diff-json-path: cdk-diff-smoke.json
           summary-output-path: smoke-summary.md
 
-      - name: Verify smoke summary
+      - name: Verify composite action smoke summary
         run: grep -q "SmokeFunction" smoke-summary.md
 
-      - name: Larger example smoke test
+      - name: Larger example composite action smoke test
         uses: ./
         with:
           diff-json-path: example_cdk_diff_json/cdk-diff-json-large-realistic.json
@@ -71,9 +82,10 @@ jobs:
         run: |
           grep -q "CDK diff summary - larger example" large-example-summary.md
           grep -q "### Modifies" large-example-summary.md
+          grep -q "### Security group changes" large-example-summary.md
 
       - name: Upload larger example summary
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: large-example-cdk-diff-summary
           path: large-example-summary.md
@@ -81,6 +93,6 @@ jobs:
   actionlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Run actionlint
         uses: raven-actions/actionlint@v2

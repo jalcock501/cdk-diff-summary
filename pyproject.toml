@@ -1,28 +1,59 @@
-[tool.poetry]
-name = "cdk-diff-summary"
-version = "1.1.1"
-description = "A composite GitHub Action that summarizes AWS CDK diff JSON."
-authors = ["cdk-diff-summary contributors"]
-readme = "README.md"
-packages = [{ include = "cdk_diff_summary", from = "scripts" }]
-
-[tool.poetry.dependencies]
-python = "^3.11"
-
-[tool.poetry.group.dev.dependencies]
-pytest = ">=8.3,<10.0"
-ruff = ">=0.8,<0.16"
-
-[tool.poetry.scripts]
-cdk-diff-summary = "cdk_diff_summary.cli:main"
-test = "pytest:console_main"
-
 [build-system]
-requires = ["poetry-core>=1.8.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cdk-diff-summary"
+version = "1.1.2"
+description = "Summarize AWS CDK diff JSON as compact Markdown."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "cdk-diff-summary contributors" }]
+keywords = ["aws", "cdk", "cloudformation", "github-actions", "diff"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Build Tools",
+  "Topic :: System :: Systems Administration",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2,<2.0",
+  "pytest>=8.3,<10.0",
+  "ruff>=0.8,<0.16",
+  "twine>=5.0,<7.0",
+]
+
+[project.scripts]
+cdk-diff-summary = "cdk_diff_summary.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/jalcock501/cdk-diff-summary"
+Repository = "https://github.com/jalcock501/cdk-diff-summary"
+Documentation = "https://github.com/jalcock501/cdk-diff-summary#readme"
+Issues = "https://github.com/jalcock501/cdk-diff-summary/issues"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+cdk_diff_summary = ["py.typed"]
 
 [tool.pytest.ini_options]
-pythonpath = ["scripts"]
+pythonpath = ["src"]
 testpaths = ["tests"]
 
 [tool.ruff]

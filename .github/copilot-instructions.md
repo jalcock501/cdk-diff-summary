@@ -6,7 +6,7 @@ This repository is a composite GitHub Action named `cdk-diff-summary`.
 
 - Keep the action dependency-free at runtime.
 - Keep the action entrypoint in `scripts/cdk_diff_summary.py`.
-- Keep implementation modules under `scripts/cdk_diff_summary/`.
+- Keep implementation modules under `src/cdk_diff_summary/`.
 - Do not inline Python logic in `action.yml`.
 - Preserve backward compatibility for existing action inputs where practical.
 - Never show CDK/CloudFormation before/after values in summaries; show changed
@@ -20,8 +20,10 @@ This repository is a composite GitHub Action named `cdk-diff-summary`.
 Before proposing or completing code changes, run:
 
 ```bash
-poetry run test
-poetry run ruff check .
+python -m pytest
+ruff check .
+python -m build
+twine check dist/*
 ```
 
 If either command cannot be run, say so explicitly and explain why.

@@ -10,7 +10,7 @@ The action is intentionally small:
 
 - The composite action metadata lives in `action.yml`.
 - The action entrypoint is `scripts/cdk_diff_summary.py`.
-- Runtime modules live in `scripts/cdk_diff_summary/`.
+- Runtime modules live in `src/cdk_diff_summary/`.
 - Tests live in `tests/`.
 - Example CDK diff fixtures live in `example_cdk_diff_json/`.
 - CI workflows live in `.github/workflows/`.
@@ -62,19 +62,19 @@ Do not inline Python logic in `action.yml`.
 Install dependencies:
 
 ```bash
-poetry install
+python -m pip install -e ".[dev]"
 ```
 
 Run tests:
 
 ```bash
-poetry run test
+python -m pytest
 ```
 
 Run lint checks:
 
 ```bash
-poetry run ruff check .
+ruff check .
 ```
 
 Before completing code changes, run both validation commands. If either command
@@ -108,8 +108,10 @@ cannot be run, say so explicitly and explain why.
 
 ## GitHub Actions Guidelines
 
-- CI should run `poetry run test`.
-- CI should run `poetry run ruff check .`.
+- CI should run `python -m pytest`.
+- CI should run `ruff check .`.
+- CI should build the PyPI package with `python -m build`.
+- CI should run `twine check dist/*`.
 - CI should smoke test the real composite action with `uses: ./`.
 - CI should include at least one larger example fixture smoke test so the
   generated Markdown report can be inspected.
