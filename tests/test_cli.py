@@ -30,9 +30,11 @@ def write_diff(path: Path, *, action: str = "modify", replacement: bool = False)
     )
 
 
-def test_prints_to_stdout_when_no_output_paths(capsys, tmp_path: Path) -> None:
+def test_prints_to_stdout_when_no_output_paths(monkeypatch, capsys, tmp_path: Path) -> None:
     diff_path = tmp_path / "diff.json"
     write_diff(diff_path)
+    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+    monkeypatch.delenv("SUMMARY_OUTPUT_PATH", raising=False)
 
     assert cli.main([str(diff_path)]) == 0
 
