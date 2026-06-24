@@ -50,4 +50,6 @@ runs:
         FAIL_ON_REMOVE: ${{ inputs.fail-on-remove }}
         FAIL_ON_REPLACE: ${{ inputs.fail-on-replace }}
         SUMMARY_OUTPUT_PATH: ${{ inputs.summary-output-path }}
-      run: python "$GITHUB_ACTION_PATH/scripts/cdk_diff_summary.py"
+      run: >-
+        python "$GITHUB_ACTION_PATH/scripts/cdk_diff_summary.py"
+        --github-step-summary "$GITHUB_STEP_SUMMARY"

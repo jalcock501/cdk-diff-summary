@@ -43,7 +43,7 @@ AWS CDK does not provide a stable `cdk diff --json` output. Use CloudFormation c
 | Input                   | Required | Default            | Description                                                                                                                                                         |
 | ----------------------- | -------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `diff-json-path`        | yes      |                    | Path to CDK or CloudFormation change set JSON.                                                                                                                      |
-| `summary-title`         | no       | `CDK diff summary` | Markdown heading for the summary.                                                                                                                                   |
+| `summary-title`         | no       | `CDK diff summary` | Markdown heading for the summary. Pass an empty string to suppress the heading.                                                                                      |
 | `max-changed-fields`    | no       | `8`                | Maximum changed field paths shown per resource.                                                                                                                     |
 | `collapse-iam-policies` | no       | `true`             | Collapse large IAM policy document diffs to a single path such as `PolicyDocument`.                                                                                 |
 | `collapse-assets`       | no       | `true`             | Suppress or collapse common CDK asset/hash churn such as asset hashes, S3 object keys, Lambda code hashes, Docker image asset hashes, and CDK metadata asset paths. |
@@ -99,14 +99,14 @@ cdk-diff-summary change-set.json --fail-on-remove --fail-on-replace
 | Option                                                   | Description                                                                                        |
 | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `diff-json-path`                                         | Path to CDK or CloudFormation change set JSON. May also be set with `DIFF_JSON_PATH`.              |
-| `--title`                                                | Markdown heading for the summary. Defaults to `CDK diff summary`.                                  |
+| `--title`                                                | Markdown heading for the summary. Defaults to `CDK diff summary`; pass `""` to suppress it.        |
 | `--max-changed-fields`                                   | Maximum changed field paths shown per resource. Defaults to `8`.                                   |
 | `--collapse-iam-policies` / `--no-collapse-iam-policies` | Collapse large IAM policy document diffs to compact paths. Enabled by default.                     |
 | `--collapse-assets` / `--no-collapse-assets`             | Collapse common CDK asset/hash churn. Enabled by default.                                          |
 | `--fail-on-remove` / `--no-fail-on-remove`               | Write the summary, then exit non-zero if visible resource removes exist. Disabled by default.      |
 | `--fail-on-replace` / `--no-fail-on-replace`             | Write the summary, then exit non-zero if visible resource replacements exist. Disabled by default. |
 | `--output`                                               | Optional path to append the generated Markdown summary.                                            |
-| `--github-step-summary`                                  | Optional path to append GitHub Step Summary Markdown. Defaults to `$GITHUB_STEP_SUMMARY`.          |
+| `--github-step-summary`                                  | Optional explicit path to append GitHub Step Summary Markdown.                                     |
 
 Environment variables compatible with the GitHub Action wrapper are also supported:
 
@@ -118,7 +118,6 @@ Environment variables compatible with the GitHub Action wrapper are also support
 - `FAIL_ON_REMOVE`
 - `FAIL_ON_REPLACE`
 - `SUMMARY_OUTPUT_PATH`
-- `GITHUB_STEP_SUMMARY`
 
 CLI arguments take precedence over environment variables.
 
@@ -167,8 +166,7 @@ Run the action wrapper directly:
 
 ```bash
 DIFF_JSON_PATH=example_cdk_changesets_json/small-webstack-cdk-diff.json \
-GITHUB_STEP_SUMMARY=/tmp/cdk-summary.md \
-python scripts/cdk_diff_summary.py
+python scripts/cdk_diff_summary.py --github-step-summary /tmp/cdk-summary.md
 ```
 
 Run the installed CLI:

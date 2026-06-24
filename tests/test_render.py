@@ -8,6 +8,17 @@ def test_changed_field_truncation() -> None:
     assert format_changed_fields(fields, max_changed_fields=2) == "`A`, `B`, `...`"
 
 
+def test_blank_title_suppresses_heading(large_change_set: dict) -> None:
+    markdown = render_summary(
+        parse_diff(large_change_set),
+        title="",
+        max_changed_fields=2,
+    )
+
+    assert not markdown.startswith("##")
+    assert markdown.startswith("| Metric | Count |")
+
+
 def test_render_full_markdown_summary(large_change_set: dict) -> None:
     markdown = render_summary(
         parse_diff(large_change_set),
