@@ -46,12 +46,12 @@ def main(argv: list[str] | None = None) -> int:
 
 def parse_args(argv: list[str] | None = None) -> CliConfig:
     parser = argparse.ArgumentParser(
-        description="Render a compact Markdown summary from AWS CDK diff JSON.",
+        description="Render compact Markdown from CloudFormation change set JSON.",
     )
     parser.add_argument(
         "diff_json_path",
         nargs="?",
-        help="Path to JSON produced by cdk diff --json. Defaults to DIFF_JSON_PATH.",
+        help="Path to CDK or CloudFormation change set JSON. Defaults to DIFF_JSON_PATH.",
     )
     parser.add_argument(
         "--title",

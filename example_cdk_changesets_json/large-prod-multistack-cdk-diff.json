@@ -1,0 +1,607 @@
+{
+  "version": "36.0.0",
+  "stacks": {
+    "SampleApp-Prod-PlatformStack": {
+      "templatePath": "cdk.out/SampleApp-Prod-PlatformStack.template.json",
+      "changeSet": [
+        {
+          "id": "VpcPrivateSubnet1RouteTableAssociation",
+          "path": "SampleApp-Prod-PlatformStack/VpcPrivateSubnet1RouteTableAssociation/Resource",
+          "changeType": "Add",
+          "logicalId": "VpcPrivateSubnet1RouteTableAssociationB41F9F2C",
+          "resourceType": "AWS::EC2::SubnetRouteTableAssociation",
+          "replacement": "N/A",
+          "changeImpact": "Associates private subnet 1 with new route table",
+          "after": {
+            "SubnetId": {
+              "Ref": "VpcPrivateSubnet1Subnet8BCA10E0"
+            },
+            "RouteTableId": {
+              "Ref": "VpcPrivateSubnet1RouteTableBE8A6027"
+            }
+          }
+        },
+        {
+          "id": "VpcPrivateSubnet2RouteTableAssociation",
+          "path": "SampleApp-Prod-PlatformStack/VpcPrivateSubnet2RouteTableAssociation/Resource",
+          "changeType": "Add",
+          "logicalId": "VpcPrivateSubnet2RouteTableAssociation7280A534",
+          "resourceType": "AWS::EC2::SubnetRouteTableAssociation",
+          "replacement": "N/A",
+          "changeImpact": "Associates private subnet 2 with new route table",
+          "after": {
+            "SubnetId": {
+              "Ref": "VpcPrivateSubnet2SubnetCFCDAA7A"
+            },
+            "RouteTableId": {
+              "Ref": "VpcPrivateSubnet2RouteTable0A19E10E"
+            }
+          }
+        },
+        {
+          "id": "AppSecurityGroup",
+          "path": "SampleApp-Prod-PlatformStack/AppSecurityGroup/Resource",
+          "changeType": "Modify",
+          "logicalId": "AppSecurityGroupF3F49A23",
+          "resourceType": "AWS::EC2::SecurityGroup",
+          "replacement": "False",
+          "changeImpact": "Restricts inbound HTTPS from public CIDR to ALB SG",
+          "before": {
+            "SecurityGroupIngress": [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": 443,
+                "ToPort": 443,
+                "CidrIp": "0.0.0.0/0"
+              }
+            ]
+          },
+          "after": {
+            "SecurityGroupIngress": [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": 443,
+                "ToPort": 443,
+                "SourceSecurityGroupId": {
+                  "Ref": "AlbSecurityGroup6E5F0B9B"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "AlbHttpIngress",
+          "path": "SampleApp-Prod-PlatformStack/AlbHttpIngress/Resource",
+          "changeType": "Remove",
+          "logicalId": "AlbSecurityGroupIngress80CBE42865",
+          "resourceType": "AWS::EC2::SecurityGroupIngress",
+          "replacement": "N/A",
+          "changeImpact": "Removes plaintext HTTP listener ingress",
+          "before": {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          }
+        },
+        {
+          "id": "ApplicationLoadBalancerHttpsListener",
+          "path": "SampleApp-Prod-PlatformStack/ApplicationLoadBalancerHttpsListener/Resource",
+          "changeType": "Modify",
+          "logicalId": "ApplicationLoadBalancerHttpsListener1F2D918A",
+          "resourceType": "AWS::ElasticLoadBalancingV2::Listener",
+          "replacement": "False",
+          "changeImpact": "Updates TLS policy and certificate reference",
+          "before": {
+            "SslPolicy": "ELBSecurityPolicy-TLS13-1-2-2021-06",
+            "Certificates": [
+              {
+                "CertificateArn": "arn:aws:acm:eu-west-2:111111111111:certificate/old"
+              }
+            ]
+          },
+          "after": {
+            "SslPolicy": "ELBSecurityPolicy-TLS13-1-2-Res-2021-06",
+            "Certificates": [
+              {
+                "CertificateArn": {
+                  "Ref": "ApiCertificateC4DBB17A"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "ApiCertificate",
+          "path": "SampleApp-Prod-PlatformStack/ApiCertificate/Resource",
+          "changeType": "Add",
+          "logicalId": "ApiCertificateC4DBB17A",
+          "resourceType": "AWS::CertificateManager::Certificate",
+          "replacement": "N/A",
+          "changeImpact": "Adds DNS validated internal API certificate",
+          "after": {
+            "DomainName": "api.example.internal",
+            "ValidationMethod": "DNS"
+          }
+        }
+      ],
+      "securityChanges": {
+        "hasSecurityChanges": true,
+        "permissionsBroadening": [],
+        "networkChanges": [
+          {
+            "resource": "AppSecurityGroupF3F49A23",
+            "reason": "Public HTTPS ingress is restricted"
+          },
+          {
+            "resource": "AlbSecurityGroupIngress80CBE42865",
+            "reason": "Public HTTP ingress removed"
+          }
+        ]
+      }
+    },
+    "SampleApp-Prod-ServiceStack": {
+      "templatePath": "cdk.out/SampleApp-Prod-ServiceStack.template.json",
+      "changeSet": [
+        {
+          "id": "AppTaskDefinition",
+          "path": "SampleApp-Prod-ServiceStack/AppTaskDefinition/Resource",
+          "changeType": "Modify",
+          "logicalId": "AppTaskDefinition2D5A72B1",
+          "resourceType": "AWS::ECS::TaskDefinition",
+          "replacement": "True",
+          "changeImpact": "Replaces task definition with larger CPU/memory and telemetry sidecar",
+          "before": {
+            "Cpu": "512",
+            "Memory": "1024",
+            "ContainerDefinitions": [
+              {
+                "Name": "app",
+                "Image": "app:1.8.2"
+              }
+            ]
+          },
+          "after": {
+            "Cpu": "1024",
+            "Memory": "2048",
+            "ContainerDefinitions": [
+              {
+                "Name": "app",
+                "Image": "app:1.9.0"
+              },
+              {
+                "Name": "otel-agent",
+                "Image": "public.ecr.aws/aws-observability/aws-otel-collector:v0.40.0"
+              }
+            ]
+          }
+        },
+        {
+          "id": "AppService",
+          "path": "SampleApp-Prod-ServiceStack/AppService/Resource",
+          "changeType": "Modify",
+          "logicalId": "AppService7FA3E12E",
+          "resourceType": "AWS::ECS::Service",
+          "replacement": "False",
+          "changeImpact": "Scales desired count and enables deployment circuit breaker",
+          "before": {
+            "DesiredCount": 2,
+            "DeploymentConfiguration": {
+              "MaximumPercent": 200,
+              "MinimumHealthyPercent": 50
+            }
+          },
+          "after": {
+            "DesiredCount": 4,
+            "DeploymentConfiguration": {
+              "MaximumPercent": 200,
+              "MinimumHealthyPercent": 100,
+              "DeploymentCircuitBreaker": {
+                "Enable": true,
+                "Rollback": true
+              }
+            }
+          }
+        },
+        {
+          "id": "TaskExecutionRoleDefaultPolicy",
+          "path": "SampleApp-Prod-ServiceStack/TaskExecutionRoleDefaultPolicy/Resource",
+          "changeType": "Modify",
+          "logicalId": "AppTaskExecutionRoleDefaultPolicyA88C3A71",
+          "resourceType": "AWS::IAM::Policy",
+          "replacement": "False",
+          "changeImpact": "Adds Secrets Manager and X-Ray telemetry permissions",
+          "before": {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "ecr:GetAuthorizationToken",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "*"
+                }
+              ]
+            }
+          },
+          "after": {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "ecr:GetAuthorizationToken",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "*"
+                },
+                {
+                  "Action": [
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Ref": "DatabaseSecret"
+                  }
+                },
+                {
+                  "Action": [
+                    "xray:PutTraceSegments",
+                    "xray:PutTelemetryRecords"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "securityChanges": {
+        "hasSecurityChanges": true,
+        "permissionsBroadening": [
+          {
+            "resource": "AppTaskExecutionRoleDefaultPolicyA88C3A71",
+            "reason": "Adds secretsmanager:GetSecretValue and X-Ray write actions"
+          }
+        ]
+      }
+    },
+    "SampleApp-Prod-DataStack": {
+      "templatePath": "cdk.out/SampleApp-Prod-DataStack.template.json",
+      "changeSet": [
+        {
+          "id": "Database",
+          "path": "SampleApp-Prod-DataStack/Database/Resource",
+          "changeType": "Modify",
+          "logicalId": "DatabaseB269D8BB",
+          "resourceType": "AWS::RDS::DBInstance",
+          "replacement": "False",
+          "changeImpact": "Upgrades instance class, backup retention and deletion protection",
+          "before": {
+            "DBInstanceClass": "db.t4g.medium",
+            "DeletionProtection": false,
+            "BackupRetentionPeriod": 7
+          },
+          "after": {
+            "DBInstanceClass": "db.t4g.large",
+            "DeletionProtection": true,
+            "BackupRetentionPeriod": 14
+          }
+        },
+        {
+          "id": "DatabaseSecurityGroupIngress",
+          "path": "SampleApp-Prod-DataStack/DatabaseSecurityGroupIngress/Resource",
+          "changeType": "Modify",
+          "logicalId": "DatabaseSecurityGroupIngress3D621F2E",
+          "resourceType": "AWS::EC2::SecurityGroupIngress",
+          "replacement": "False",
+          "changeImpact": "Changes DB access source from legacy worker SG to service SG",
+          "before": {
+            "IpProtocol": "tcp",
+            "FromPort": 5432,
+            "ToPort": 5432,
+            "SourceSecurityGroupId": {
+              "Ref": "LegacyWorkerSecurityGroupF1729D02"
+            }
+          },
+          "after": {
+            "IpProtocol": "tcp",
+            "FromPort": 5432,
+            "ToPort": 5432,
+            "SourceSecurityGroupId": {
+              "Fn::ImportValue": "SampleApp-Prod-ServiceSecurityGroupId"
+            }
+          }
+        }
+      ],
+      "securityChanges": {
+        "hasSecurityChanges": true,
+        "networkChanges": [
+          {
+            "resource": "DatabaseSecurityGroupIngress3D621F2E",
+            "reason": "Database source security group changed"
+          }
+        ]
+      }
+    },
+    "SampleApp-Prod-AuditStack": {
+      "templatePath": "cdk.out/SampleApp-Prod-AuditStack.template.json",
+      "changeSet": [
+        {
+          "id": "AuditBucket",
+          "path": "SampleApp-Prod-AuditStack/AuditBucket/Resource",
+          "changeType": "Modify",
+          "logicalId": "AuditBucket2C95B9B2",
+          "resourceType": "AWS::S3::Bucket",
+          "replacement": "False",
+          "changeImpact": "Switches bucket encryption to KMS and adds lifecycle transition",
+          "before": {
+            "BucketEncryption": {
+              "ServerSideEncryptionConfiguration": [
+                {
+                  "ServerSideEncryptionByDefault": {
+                    "SSEAlgorithm": "AES256"
+                  }
+                }
+              ]
+            }
+          },
+          "after": {
+            "BucketEncryption": {
+              "ServerSideEncryptionConfiguration": [
+                {
+                  "ServerSideEncryptionByDefault": {
+                    "SSEAlgorithm": "aws:kms",
+                    "KMSMasterKeyID": {
+                      "Fn::GetAtt": [
+                        "AuditKey7A8BC0D0",
+                        "Arn"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "LifecycleConfiguration": {
+              "Rules": [
+                {
+                  "Status": "Enabled",
+                  "Transitions": [
+                    {
+                      "StorageClass": "GLACIER",
+                      "TransitionInDays": 90
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "AuditKey",
+          "path": "SampleApp-Prod-AuditStack/AuditKey/Resource",
+          "changeType": "Add",
+          "logicalId": "AuditKey7A8BC0D0",
+          "resourceType": "AWS::KMS::Key",
+          "replacement": "N/A",
+          "changeImpact": "Adds customer-managed KMS key for audit bucket",
+          "after": {
+            "EnableKeyRotation": true,
+            "KeyPolicy": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "AWS": {
+                      "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root"
+                    }
+                  },
+                  "Action": "kms:*",
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "AuditBucketPolicy",
+          "path": "SampleApp-Prod-AuditStack/AuditBucketPolicy/Resource",
+          "changeType": "Modify",
+          "logicalId": "AuditBucketPolicyD4C8ED77",
+          "resourceType": "AWS::S3::BucketPolicy",
+          "replacement": "False",
+          "changeImpact": "Denies insecure transport to audit bucket",
+          "before": {
+            "PolicyDocument": {
+              "Statement": []
+            }
+          },
+          "after": {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Sid": "DenyInsecureTransport",
+                  "Effect": "Deny",
+                  "Action": "s3:*",
+                  "Principal": "*",
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "AuditBucket2C95B9B2",
+                        "Arn"
+                      ]
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          {
+                            "Fn::GetAtt": [
+                              "AuditBucket2C95B9B2",
+                              "Arn"
+                            ]
+                          },
+                          "/*"
+                        ]
+                      ]
+                    }
+                  ],
+                  "Condition": {
+                    "Bool": {
+                      "aws:SecureTransport": "false"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "securityChanges": {
+        "hasSecurityChanges": true,
+        "permissionsBroadening": [
+          {
+            "resource": "AuditKey7A8BC0D0",
+            "reason": "Adds root account KMS admin policy"
+          }
+        ]
+      }
+    },
+    "SampleApp-Prod-WorkerStack": {
+      "templatePath": "cdk.out/SampleApp-Prod-WorkerStack.template.json",
+      "changeSet": [
+        {
+          "id": "ProcessorFunction",
+          "path": "SampleApp-Prod-WorkerStack/ProcessorFunction/Resource",
+          "changeType": "Modify",
+          "logicalId": "ProcessorFunction994B8E60",
+          "resourceType": "AWS::Lambda::Function",
+          "replacement": "False",
+          "changeImpact": "Updates Lambda runtime, reserved concurrency and tracing",
+          "before": {
+            "Runtime": "python3.11",
+            "ReservedConcurrentExecutions": 10,
+            "TracingConfig": {
+              "Mode": "PassThrough"
+            }
+          },
+          "after": {
+            "Runtime": "python3.12",
+            "ReservedConcurrentExecutions": 25,
+            "TracingConfig": {
+              "Mode": "Active"
+            },
+            "Code": {
+              "S3Key": "asset.58ec19a4.zip"
+            }
+          }
+        },
+        {
+          "id": "ProcessorFunctionQueueEventSource",
+          "path": "SampleApp-Prod-WorkerStack/ProcessorFunctionQueueEventSource/Resource",
+          "changeType": "Add",
+          "logicalId": "ProcessorFunctionQueueEventSourceFE996A22",
+          "resourceType": "AWS::Lambda::EventSourceMapping",
+          "replacement": "N/A",
+          "changeImpact": "Adds SQS trigger with partial batch failure reporting",
+          "after": {
+            "BatchSize": 10,
+            "FunctionName": {
+              "Ref": "ProcessorFunction994B8E60"
+            },
+            "EventSourceArn": {
+              "Fn::GetAtt": [
+                "ProcessingQueueA1BA6201",
+                "Arn"
+              ]
+            },
+            "FunctionResponseTypes": [
+              "ReportBatchItemFailures"
+            ]
+          }
+        },
+        {
+          "id": "ProcessingQueue",
+          "path": "SampleApp-Prod-WorkerStack/ProcessingQueue/Resource",
+          "changeType": "Modify",
+          "logicalId": "ProcessingQueueA1BA6201",
+          "resourceType": "AWS::SQS::Queue",
+          "replacement": "False",
+          "changeImpact": "Increases visibility timeout and enables SQS managed SSE",
+          "before": {
+            "VisibilityTimeout": 30,
+            "SqsManagedSseEnabled": false
+          },
+          "after": {
+            "VisibilityTimeout": 120,
+            "SqsManagedSseEnabled": true
+          }
+        }
+      ],
+      "securityChanges": {
+        "hasSecurityChanges": false,
+        "permissionsBroadening": []
+      }
+    },
+    "SampleApp-Prod-MonitoringStack": {
+      "templatePath": "cdk.out/SampleApp-Prod-MonitoringStack.template.json",
+      "changeSet": [
+        {
+          "id": "PublicDashboard",
+          "path": "SampleApp-Prod-MonitoringStack/PublicDashboard/Resource",
+          "changeType": "Remove",
+          "logicalId": "PublicDashboardD4ED47B2",
+          "resourceType": "AWS::CloudWatch::Dashboard",
+          "replacement": "N/A",
+          "changeImpact": "Removes deprecated dashboard",
+          "before": {
+            "DashboardName": "sampleapp-prod-public"
+          }
+        },
+        {
+          "id": "AlarmTopic",
+          "path": "SampleApp-Prod-MonitoringStack/AlarmTopic/Resource",
+          "changeType": "Add",
+          "logicalId": "AlarmTopicB4A8F4DE",
+          "resourceType": "AWS::SNS::Topic",
+          "replacement": "N/A",
+          "changeImpact": "Adds SNS topic for operational alarms",
+          "after": {
+            "TopicName": "sampleapp-prod-alarms"
+          }
+        },
+        {
+          "id": "HighErrorRateAlarm",
+          "path": "SampleApp-Prod-MonitoringStack/HighErrorRateAlarm/Resource",
+          "changeType": "Add",
+          "logicalId": "HighErrorRateAlarmE509AE11",
+          "resourceType": "AWS::CloudWatch::Alarm",
+          "replacement": "N/A",
+          "changeImpact": "Adds API 5xx alarm wired to alarm topic",
+          "after": {
+            "ComparisonOperator": "GreaterThanThreshold",
+            "EvaluationPeriods": 3,
+            "MetricName": "HTTPCode_Target_5XX_Count",
+            "Namespace": "AWS/ApplicationELB",
+            "Period": 60,
+            "Statistic": "Sum",
+            "Threshold": 10,
+            "AlarmActions": [
+              {
+                "Ref": "AlarmTopicB4A8F4DE"
+              }
+            ]
+          }
+        }
+      ],
+      "securityChanges": {
+        "hasSecurityChanges": false,
+        "permissionsBroadening": []
+      }
+    }
+  }
+}

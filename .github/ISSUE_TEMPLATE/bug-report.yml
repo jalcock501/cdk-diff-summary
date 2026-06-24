@@ -9,7 +9,7 @@ body:
       value: |
         Thanks for reporting a bug.
 
-        Please avoid pasting unsanitized CDK diff output. The action intentionally avoids printing before/after values because infrastructure diffs may contain sensitive data.
+        Please avoid pasting unsanitized change set output. The action intentionally avoids printing before/after values because infrastructure diffs may contain sensitive data.
 
   - type: textarea
     id: description
@@ -25,7 +25,7 @@ body:
       label: Steps to reproduce
       description: Provide a minimal workflow snippet, environment variables, or sanitized fixture if useful.
       placeholder: |
-        1. Generate a sanitized CDK diff JSON file.
+        1. Generate a sanitized CloudFormation change set JSON file.
         2. Run cdk-diff-summary with these inputs.
         3. Observe this result.
     validations:

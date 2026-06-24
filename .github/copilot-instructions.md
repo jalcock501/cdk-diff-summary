@@ -11,7 +11,8 @@ This repository is a composite GitHub Action named `cdk-diff-summary`.
 - Preserve backward compatibility for existing action inputs where practical.
 - Never show CDK/CloudFormation before/after values in summaries; show changed
   field paths only.
-- Treat CDK diff JSON as potentially sensitive infrastructure data.
+- Treat CloudFormation change set JSON as potentially sensitive infrastructure
+  data.
 - Keep default noise reduction conservative. Do not hide removals or
   replacements.
 
@@ -45,5 +46,5 @@ For Copilot reviews, pay special attention to:
 - README examples staying aligned with implemented behavior.
 - CI smoke tests exercising the real composite action with `uses: ./`,
   including at least one larger example fixture summary.
-- Parser changes remaining tolerant of CDK diff JSON shape differences across
-  CDK versions.
+- Parser changes remaining tolerant of CloudFormation change set JSON shape
+  differences while preserving existing normalized fixture support.

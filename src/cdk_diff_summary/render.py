@@ -44,7 +44,7 @@ def render_summary(summary: DiffSummary, *, title: str, max_changed_fields: int)
         lines.append("")
 
     if not summary.resources and not summary.security_group_changes:
-        lines.append("No resource changes found in the CDK diff JSON.")
+        lines.append("No resource changes found in the input JSON.")
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"

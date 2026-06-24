@@ -3,8 +3,8 @@
 ## Project Overview
 
 This repository contains `cdk-diff-summary`, a composite GitHub Action that
-reads AWS CDK diff JSON and writes a compact Markdown summary to the GitHub
-Step Summary.
+reads CloudFormation change set JSON and writes a compact Markdown summary to
+the GitHub Step Summary.
 
 The action is intentionally small:
 
@@ -12,14 +12,14 @@ The action is intentionally small:
 - The action entrypoint is `scripts/cdk_diff_summary.py`.
 - Runtime modules live in `src/cdk_diff_summary/`.
 - Tests live in `tests/`.
-- Example CDK diff fixtures live in `example_cdk_diff_json/`.
+- Example sanitized diff/change-set fixtures live in `example_cdk_changesets_json/`.
 - CI workflows live in `.github/workflows/`.
 
 ## Core Behavior
 
-- Read CDK diff JSON from `DIFF_JSON_PATH`.
-- Parse stack and resource changes from CDK diff JSON, tolerating reasonable
-  shape differences across CDK versions.
+- Read CloudFormation change set JSON from `DIFF_JSON_PATH`.
+- Parse stack and resource changes from CloudFormation change set JSON, while
+  preserving support for the older normalized fixture shape.
 - Render counts for stack changes, resource changes, adds, modifies, removes,
   replacements, and changes shown below.
 - Group visible resource changes into replacements, removes, adds, modifies,
@@ -101,7 +101,7 @@ cannot be run, say so explicitly and explain why.
   collapse, fail-gate, or rendering logic.
 - Keep tests synthetic or sanitized. Do not use secrets, tokens, account
   credentials, certificates, or unsanitized production CDK output.
-- Use fixtures in `example_cdk_diff_json/` when broader parser coverage or
+- Use fixtures in `example_cdk_changesets_json/` when broader parser coverage or
   smoke-style behavior is useful.
 - CI should test both Python logic and the real local composite action via
   `uses: ./`.
@@ -121,7 +121,8 @@ cannot be run, say so explicitly and explain why.
 
 ## Security and Privacy
 
-- Treat CDK diff JSON as potentially sensitive infrastructure data.
+- Treat CloudFormation change set JSON as potentially sensitive infrastructure
+  data.
 - Do not add output that prints resource values from old/new, before/after,
   or equivalent fields.
 - Do not expand large IAM policy documents into the summary.
@@ -145,4 +146,4 @@ When reviewing changes, focus on:
 - Broken action input wiring between `action.yml` and environment variables.
 - README examples staying aligned with implemented behavior.
 - Missing tests for new parsing, collapse, fail-gate, or rendering behavior.
-- Parser changes becoming too tightly coupled to one CDK diff JSON shape.
+- Parser changes becoming too tightly coupled to one input JSON shape.
