@@ -7,23 +7,27 @@ from cdk_diff_summary import cli
 
 
 def write_diff(path: Path, *, action: str = "modify", replacement: bool = False) -> None:
+    change_type = {"delete": "Remove", "remove": "Remove"}.get(action, action.title())
+    replacement_value = "True" if replacement else "False"
     path.write_text(
         json.dumps(
             {
-                "stacks": [
-                    {
-                        "stackName": "Stack",
-                        "resources": [
+                "version": "36.0.0",
+                "stacks": {
+                    "Stack": {
+                        "changeSet": [
                             {
+                                "id": "Thing",
                                 "logicalId": "Thing",
                                 "resourceType": "Custom::Thing",
-                                "action": action,
-                                "replacement": replacement,
-                                "propertyChanges": [{"path": "Name"}],
+                                "changeType": change_type,
+                                "replacement": replacement_value,
+                                "before": {"Name": "Before"},
+                                "after": {"Name": "After"},
                             }
                         ],
                     }
-                ]
+                },
             }
         ),
         encoding="utf-8",

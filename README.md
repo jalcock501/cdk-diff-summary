@@ -1,6 +1,6 @@
 # cdk-diff-summary
 
-`cdk-diff-summary` reads AWS CDK diff JSON and renders a compact Markdown summary.
+`cdk-diff-summary` reads CloudFormation change set JSON and renders a compact Markdown summary.
 
 This repository is the source of truth for both:
 
@@ -14,29 +14,42 @@ The tool deliberately shows changed field paths only, not before/after values, t
 ## GitHub Action Usage
 
 ```yaml
-- name: Generate CDK diff JSON
-  run: npx cdk diff --json > cdk-diff.json
+- name: Create CDK change set
+  run: |
+    npx cdk deploy \
+      --method=prepare-change-set \
+      --change-set-name pr-${{ github.event.pull_request.number || github.run_id }} \
+      --require-approval never
+
+- name: Describe CloudFormation change set
+  run: |
+    aws cloudformation describe-change-set \
+      --stack-name MyStack \
+      --change-set-name pr-${{ github.event.pull_request.number || github.run_id }} \
+      --output json > change-set.json
 
 - name: Summarize CDK diff
   uses: jalcock501/cdk-diff-summary@v1
   with:
-    diff-json-path: cdk-diff.json
+    diff-json-path: change-set.json
 ```
 
 The composite action runs the local checked-out code from the action tag. It does not install `cdk-diff-summary` from PyPI at runtime.
 
+AWS CDK does not provide a stable `cdk diff --json` output. Use CloudFormation change sets, then pass the JSON from `aws cloudformation describe-change-set` to this action.
+
 ## Action Inputs
 
-| Input | Required | Default | Description |
-| --- | --- | --- | --- |
-| `diff-json-path` | yes | | Path to JSON produced by `cdk diff --json`. |
-| `summary-title` | no | `CDK diff summary` | Markdown heading for the summary. |
-| `max-changed-fields` | no | `8` | Maximum changed field paths shown per resource. |
-| `collapse-iam-policies` | no | `true` | Collapse large IAM policy document diffs to a single path such as `PolicyDocument`. |
-| `collapse-assets` | no | `true` | Suppress or collapse common CDK asset/hash churn such as asset hashes, S3 object keys, Lambda code hashes, Docker image asset hashes, and CDK metadata asset paths. |
-| `fail-on-remove` | no | `false` | Write the summary, then fail the step if visible removes exist. |
-| `fail-on-replace` | no | `false` | Write the summary, then fail the step if visible replacements exist. |
-| `summary-output-path` | no | | Optional file path to also append the generated Markdown summary. |
+| Input                   | Required | Default            | Description                                                                                                                                                         |
+| ----------------------- | -------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `diff-json-path`        | yes      |                    | Path to CDK or CloudFormation change set JSON.                                                                                                                      |
+| `summary-title`         | no       | `CDK diff summary` | Markdown heading for the summary.                                                                                                                                   |
+| `max-changed-fields`    | no       | `8`                | Maximum changed field paths shown per resource.                                                                                                                     |
+| `collapse-iam-policies` | no       | `true`             | Collapse large IAM policy document diffs to a single path such as `PolicyDocument`.                                                                                 |
+| `collapse-assets`       | no       | `true`             | Suppress or collapse common CDK asset/hash churn such as asset hashes, S3 object keys, Lambda code hashes, Docker image asset hashes, and CDK metadata asset paths. |
+| `fail-on-remove`        | no       | `false`            | Write the summary, then fail the step if visible removes exist.                                                                                                     |
+| `fail-on-replace`       | no       | `false`            | Write the summary, then fail the step if visible replacements exist.                                                                                                |
+| `summary-output-path`   | no       |                    | Optional file path to also append the generated Markdown summary.                                                                                                   |
 
 ## PyPI / CLI Usage
 
@@ -46,28 +59,31 @@ Install with `pipx`:
 pipx install cdk-diff-summary
 ```
 
-Generate CDK diff JSON:
+Generate CloudFormation change set JSON:
 
 ```bash
-npx cdk diff --json > cdk-diff.json
+aws cloudformation describe-change-set \
+  --stack-name MyStack \
+  --change-set-name MyChangeSet \
+  --output json > change-set.json
 ```
 
 Render Markdown to stdout:
 
 ```bash
-cdk-diff-summary cdk-diff.json
+cdk-diff-summary change-set.json
 ```
 
 Append Markdown to a file:
 
 ```bash
-cdk-diff-summary cdk-diff.json --output cdk-diff-summary.md
+cdk-diff-summary change-set.json --output cdk-diff-summary.md
 ```
 
 Use a custom title and field limit:
 
 ```bash
-cdk-diff-summary cdk-diff.json \
+cdk-diff-summary change-set.json \
   --title "Production CDK diff" \
   --max-changed-fields 5
 ```
@@ -75,22 +91,22 @@ cdk-diff-summary cdk-diff.json \
 Fail when visible removals or replacements exist:
 
 ```bash
-cdk-diff-summary cdk-diff.json --fail-on-remove --fail-on-replace
+cdk-diff-summary change-set.json --fail-on-remove --fail-on-replace
 ```
 
 ## CLI Options
 
-| Option | Description |
-| --- | --- |
-| `diff-json-path` | Path to JSON produced by `cdk diff --json`. May also be set with `DIFF_JSON_PATH`. |
-| `--title` | Markdown heading for the summary. Defaults to `CDK diff summary`. |
-| `--max-changed-fields` | Maximum changed field paths shown per resource. Defaults to `8`. |
-| `--collapse-iam-policies` / `--no-collapse-iam-policies` | Collapse large IAM policy document diffs to compact paths. Enabled by default. |
-| `--collapse-assets` / `--no-collapse-assets` | Collapse common CDK asset/hash churn. Enabled by default. |
-| `--fail-on-remove` / `--no-fail-on-remove` | Write the summary, then exit non-zero if visible resource removes exist. Disabled by default. |
-| `--fail-on-replace` / `--no-fail-on-replace` | Write the summary, then exit non-zero if visible resource replacements exist. Disabled by default. |
-| `--output` | Optional path to append the generated Markdown summary. |
-| `--github-step-summary` | Optional path to append GitHub Step Summary Markdown. Defaults to `$GITHUB_STEP_SUMMARY`. |
+| Option                                                   | Description                                                                                        |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `diff-json-path`                                         | Path to CDK or CloudFormation change set JSON. May also be set with `DIFF_JSON_PATH`.              |
+| `--title`                                                | Markdown heading for the summary. Defaults to `CDK diff summary`.                                  |
+| `--max-changed-fields`                                   | Maximum changed field paths shown per resource. Defaults to `8`.                                   |
+| `--collapse-iam-policies` / `--no-collapse-iam-policies` | Collapse large IAM policy document diffs to compact paths. Enabled by default.                     |
+| `--collapse-assets` / `--no-collapse-assets`             | Collapse common CDK asset/hash churn. Enabled by default.                                          |
+| `--fail-on-remove` / `--no-fail-on-remove`               | Write the summary, then exit non-zero if visible resource removes exist. Disabled by default.      |
+| `--fail-on-replace` / `--no-fail-on-replace`             | Write the summary, then exit non-zero if visible resource replacements exist. Disabled by default. |
+| `--output`                                               | Optional path to append the generated Markdown summary.                                            |
+| `--github-step-summary`                                  | Optional path to append GitHub Step Summary Markdown. Defaults to `$GITHUB_STEP_SUMMARY`.          |
 
 Environment variables compatible with the GitHub Action wrapper are also supported:
 
@@ -113,28 +129,28 @@ CLI arguments take precedence over environment variables.
 ```markdown
 ## CDK diff summary
 
-| Metric | Count |
-| --- | ---: |
-| Stack changes | 1 |
-| Resource changes | 3 |
-| Adds | 1 |
-| Modifies | 1 |
-| Removes | 0 |
-| Replacements | 1 |
-| Security group changes | 1 |
-| Changes shown below | 4 |
+| Metric                 | Count |
+| ---------------------- | ----: |
+| Stack changes          |     1 |
+| Resource changes       |     3 |
+| Adds                   |     1 |
+| Modifies               |     1 |
+| Removes                |     0 |
+| Replacements           |     1 |
+| Security group changes |     1 |
+| Changes shown below    |     4 |
 
 ### Replacements
 
-| Stack | Logical ID | Action | Resource type | Changed fields |
-| --- | --- | --- | --- | --- |
-| PaymentsStack | Worker | replace | AWS::Lambda::Function | `Architectures[]`, `Layers[]` |
+| Stack         | Logical ID | Action  | Resource type         | Changed fields                |
+| ------------- | ---------- | ------- | --------------------- | ----------------------------- |
+| PaymentsStack | Worker     | replace | AWS::Lambda::Function | `Architectures[]`, `Layers[]` |
 
 ### Security group changes
 
-| Stack | Security group | Direction | Protocol | Port | Action |
-| --- | --- | --- | --- | --- | --- |
-| PaymentsStack | AppSecurityGroup | ingress | tcp | 443 | add |
+| Stack         | Security group   | Direction | Protocol | Port | Action |
+| ------------- | ---------------- | --------- | -------- | ---- | ------ |
+| PaymentsStack | AppSecurityGroup | ingress   | tcp      | 443  | add    |
 ```
 
 ## Local Development
@@ -150,7 +166,7 @@ twine check dist/*
 Run the action wrapper directly:
 
 ```bash
-DIFF_JSON_PATH=example_cdk_diff_json/cdk-diff-json-tiny.json \
+DIFF_JSON_PATH=example_cdk_changesets_json/small-webstack-cdk-diff.json \
 GITHUB_STEP_SUMMARY=/tmp/cdk-summary.md \
 python scripts/cdk_diff_summary.py
 ```
@@ -158,7 +174,7 @@ python scripts/cdk_diff_summary.py
 Run the installed CLI:
 
 ```bash
-cdk-diff-summary example_cdk_diff_json/cdk-diff-json-tiny.json
+cdk-diff-summary example_cdk_changesets_json/small-webstack-cdk-diff.json
 ```
 
-CDK diff JSON shape can vary by CDK version. If parsing fails, please open an issue with a sanitized example of the JSON shape that failed.
+CloudFormation change set JSON can vary depending on resource type and change source. If parsing fails, please open an issue with a sanitized example of the JSON shape that failed.

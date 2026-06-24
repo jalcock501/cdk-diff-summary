@@ -1,136 +1,208 @@
 from cdk_diff_summary.diff import parse_diff
 
 
-def test_parse_representative_cdk_diff_json(tiny_diff: dict) -> None:
-    summary = parse_diff(tiny_diff)
+def test_parse_small_change_set_json(small_change_set: dict) -> None:
+    summary = parse_diff(small_change_set)
 
     assert summary.stack_changes == 1
-    assert len(summary.resources) == 2
+    assert len(summary.resources) == 3
     assert summary.adds == 1
-    assert summary.modifies == 1
+    assert summary.modifies == 2
     assert summary.removes == 0
     assert summary.replacements == 0
 
 
-def test_grouping_adds_modifies_removes_replacements(messy_diff: dict) -> None:
-    summary = parse_diff(messy_diff)
+def test_grouping_adds_modifies_removes_replacements(large_change_set: dict) -> None:
+    summary = parse_diff(large_change_set)
 
-    assert summary.adds == 2
-    assert summary.modifies == 2
-    assert summary.removes == 1
-    assert summary.replacements == 3
-    assert len(summary.security_group_changes) == 2
+    assert summary.stack_changes == 6
+    assert len(summary.resources) == 20
+    assert summary.adds == 7
+    assert summary.modifies == 10
+    assert summary.removes == 2
+    assert summary.replacements == 1
+    assert len(summary.security_group_changes) == 3
 
 
-def test_changed_field_paths_do_not_include_values(tiny_diff: dict) -> None:
-    summary = parse_diff(tiny_diff)
-    log_group = next(
-        resource for resource in summary.resources if resource.logical_id == "AppLogGroup"
+def test_changed_field_paths_are_derived_without_values(small_change_set: dict) -> None:
+    summary = parse_diff(small_change_set)
+    distribution = next(
+        resource
+        for resource in summary.resources
+        if resource.logical_id == "WebDistributionCFDistributionA1D23A76"
     )
 
-    assert log_group.changed_fields == ("RetentionInDays", "Tags[environment]")
-    assert "30" not in log_group.changed_fields
+    assert distribution.changed_fields == (
+        "DefaultCacheBehavior.DefaultTTL",
+        "DefaultCacheBehavior.MaxTTL",
+        "DefaultCacheBehavior.ResponseHeadersPolicyId",
+    )
+    assert "86400" not in distribution.changed_fields
+    assert "31536000" not in distribution.changed_fields
 
 
-def test_iam_policy_collapse_in_resource() -> None:
+def test_iam_policy_collapse_in_change_set(medium_change_set: dict) -> None:
+    summary = parse_diff(medium_change_set, collapse_iam_policies=True)
+    policy = next(
+        resource
+        for resource in summary.resources
+        if resource.logical_id == "OrderApiFunctionServiceRoleDefaultPolicy6DAA92CE"
+    )
+
+    assert policy.changed_fields == ("PolicyDocument",)
+
+
+def test_asset_fields_from_change_set_do_not_print_hash_values(medium_change_set: dict) -> None:
+    summary = parse_diff(medium_change_set, collapse_assets=True)
+    function = next(
+        resource
+        for resource in summary.resources
+        if resource.logical_id == "OrderApiFunction7B9D343F"
+    )
+
+    assert function.changed_fields == (
+        "Code.S3Key",
+        "Environment",
+        "MemorySize",
+        "Runtime",
+        "Timeout",
+    )
+    assert "asset.2b9a62d4.zip" not in function.changed_fields
+    assert "asset.a77e4210.zip" not in function.changed_fields
+
+
+def test_security_group_changes_are_inferred_from_change_set(large_change_set: dict) -> None:
+    summary = parse_diff(large_change_set)
+
+    assert [change.security_group for change in summary.security_group_changes] == [
+        "AppSecurityGroupF3F49A23",
+        "AlbSecurityGroupIngress80CBE42865",
+        "DatabaseSecurityGroupIngress3D621F2E",
+    ]
+    assert [change.direction for change in summary.security_group_changes] == [
+        "ingress",
+        "ingress",
+        "ingress",
+    ]
+    assert [change.action for change in summary.security_group_changes] == [
+        "modify",
+        "remove",
+        "modify",
+    ]
+    assert summary.security_group_changes[1].protocol == "changed"
+    assert summary.security_group_changes[1].port == "changed"
+
+
+def test_parse_cloudformation_change_set_json() -> None:
     document = {
-        "stacks": [
+        "StackName": "PaymentsStack",
+        "ChangeSetName": "cdk-diff-summary-smoke",
+        "Changes": [
             {
-                "stackName": "Stack",
-                "resources": [
-                    {
-                        "logicalId": "Policy",
-                        "resourceType": "AWS::IAM::Policy",
-                        "action": "modify",
-                        "propertyChanges": [
-                            {"path": "PolicyDocument.Statement[0].Action[0]"},
-                            {"path": "PolicyDocument.Statement[0].Resource"},
-                        ],
-                    }
-                ],
-            }
-        ]
-    }
-
-    summary = parse_diff(document, collapse_iam_policies=True)
-
-    assert summary.resources[0].changed_fields == ("PolicyDocument",)
-
-
-def test_asset_collapse_in_resource() -> None:
-    document = {
-        "stacks": [
+                "Type": "Resource",
+                "ResourceChange": {
+                    "Action": "Add",
+                    "LogicalResourceId": "Queue",
+                    "ResourceType": "AWS::SQS::Queue",
+                    "Replacement": "False",
+                    "Details": [],
+                },
+            },
             {
-                "stackName": "Stack",
-                "resources": [
-                    {
-                        "logicalId": "Function",
-                        "resourceType": "AWS::Lambda::Function",
-                        "action": "modify",
-                        "propertyChanges": [
-                            {"path": "Code.S3Key"},
-                            {"path": "SourceHash"},
-                            {"path": "Runtime"},
-                        ],
-                    }
-                ],
-            }
-        ]
-    }
-
-    summary = parse_diff(document, collapse_assets=True)
-
-    assert summary.resources[0].changed_fields == ("Code.S3Key", "Asset.Hash", "Runtime")
-
-
-def test_security_group_changes_are_parsed_without_values() -> None:
-    document = {
-        "stacks": [
+                "Type": "Resource",
+                "ResourceChange": {
+                    "Action": "Modify",
+                    "LogicalResourceId": "Worker",
+                    "ResourceType": "AWS::Lambda::Function",
+                    "Replacement": "Conditional",
+                    "Details": [
+                        {
+                            "Target": {
+                                "Attribute": "Properties",
+                                "Name": "Runtime",
+                                "RequiresRecreation": "Never",
+                            },
+                            "Evaluation": "Static",
+                            "ChangeSource": "DirectModification",
+                        },
+                        {
+                            "Target": {
+                                "Attribute": "Properties",
+                                "Name": "MemorySize",
+                                "RequiresRecreation": "Conditionally",
+                            },
+                            "Evaluation": "Dynamic",
+                            "ChangeSource": "DirectModification",
+                        },
+                    ],
+                },
+            },
             {
-                "stackName": "NetworkStack",
-                "securityGroupChanges": [
-                    {
-                        "securityGroup": "AppSecurityGroup",
-                        "direction": "ingress",
-                        "protocol": "tcp",
-                        "port": 443,
-                        "action": "add",
-                        "old": None,
-                        "new": "10.0.0.0/16",
-                    },
-                    {
-                        "securityGroup": "DatabaseSecurityGroup",
-                        "direction": "ingress",
-                        "protocol": "tcp",
-                        "port": 5432,
-                        "action": "modify",
-                        "old": "10.0.0.0/16",
-                        "new": "10.1.0.0/16",
-                    },
-                    {
-                        "securityGroup": "LegacySecurityGroup",
-                        "direction": "egress",
-                        "protocol": "tcp",
-                        "port": 25,
-                        "action": "delete",
-                        "old": "0.0.0.0/0",
-                        "new": None,
-                    },
-                ],
-            }
-        ]
+                "Type": "Resource",
+                "ResourceChange": {
+                    "Action": "Remove",
+                    "LogicalResourceId": "OldTable",
+                    "ResourceType": "AWS::DynamoDB::Table",
+                    "Replacement": "False",
+                    "Details": [],
+                },
+            },
+        ],
     }
 
     summary = parse_diff(document)
 
     assert summary.stack_changes == 1
-    assert [change.action for change in summary.security_group_changes] == [
-        "add",
-        "modify",
-        "remove",
-    ]
+    assert summary.adds == 1
+    assert summary.removes == 1
+    assert summary.replacements == 1
+    worker = next(resource for resource in summary.resources if resource.logical_id == "Worker")
+    assert worker.stack == "PaymentsStack"
+    assert worker.action == "replace"
+    assert worker.resource_type == "AWS::Lambda::Function"
+    assert worker.changed_fields == ("Runtime", "MemorySize")
+
+
+def test_cloudformation_change_set_security_group_rules_are_summarized() -> None:
+    document = {
+        "StackName": "NetworkStack",
+        "Changes": [
+            {
+                "Type": "Resource",
+                "ResourceChange": {
+                    "Action": "Modify",
+                    "LogicalResourceId": "AppIngressFromAlb",
+                    "ResourceType": "AWS::EC2::SecurityGroupIngress",
+                    "Replacement": "False",
+                    "Details": [
+                        {"Target": {"Attribute": "Properties", "Name": "IpProtocol"}},
+                        {"Target": {"Attribute": "Properties", "Name": "FromPort"}},
+                        {"Target": {"Attribute": "Properties", "Name": "ToPort"}},
+                        {"Target": {"Attribute": "Properties", "Name": "CidrIp"}},
+                    ],
+                },
+            },
+            {
+                "Type": "Resource",
+                "ResourceChange": {
+                    "Action": "Remove",
+                    "LogicalResourceId": "LegacySmtpEgress",
+                    "ResourceType": "AWS::EC2::SecurityGroupEgress",
+                    "Replacement": "False",
+                    "Details": [],
+                },
+            },
+        ],
+    }
+
+    summary = parse_diff(document)
+
+    assert len(summary.security_group_changes) == 2
     assert summary.security_group_changes[0].stack == "NetworkStack"
-    assert summary.security_group_changes[0].security_group == "AppSecurityGroup"
+    assert summary.security_group_changes[0].security_group == "AppIngressFromAlb"
     assert summary.security_group_changes[0].direction == "ingress"
-    assert summary.security_group_changes[0].protocol == "tcp"
-    assert summary.security_group_changes[0].port == "443"
+    assert summary.security_group_changes[0].protocol == "changed"
+    assert summary.security_group_changes[0].port == "changed"
+    assert summary.security_group_changes[0].action == "modify"
+    assert summary.security_group_changes[1].direction == "egress"
+    assert summary.security_group_changes[1].action == "remove"

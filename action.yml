@@ -1,12 +1,12 @@
 name: cdk-diff-summary
-description: Summarize AWS CDK diff JSON in GitHub Actions step summaries.
+description: Summarize CloudFormation change set JSON in GitHub Actions step summaries.
 author: cdk-diff-summary contributors
 branding:
   icon: layers
   color: orange
 inputs:
   diff-json-path:
-    description: Path to JSON produced by cdk diff --json.
+    description: Path to CDK or CloudFormation change set JSON.
     required: true
   summary-title:
     description: Markdown heading for the summary.

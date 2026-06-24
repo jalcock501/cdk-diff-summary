@@ -36,47 +36,30 @@ jobs:
       - name: CLI smoke test
         run: |
           cdk-diff-summary \
-            example_cdk_diff_json/cdk-diff-json-large-realistic.json \
+            example_cdk_changesets_json/large-prod-multistack-cdk-diff.json \
             --title "CDK diff summary - CLI smoke" \
             --output cli-smoke-summary.md
           grep -q "Security group changes" cli-smoke-summary.md
 
       - name: Prepare action smoke fixture
         run: |
-          cat > cdk-diff-smoke.json <<'JSON'
-          {
-            "stacks": [
-              {
-                "stackName": "SmokeStack",
-                "resources": [
-                  {
-                    "logicalId": "SmokeFunction",
-                    "resourceType": "AWS::Lambda::Function",
-                    "action": "modify",
-                    "propertyChanges": [
-                      { "path": "Runtime" },
-                      { "path": "Code.S3Key" }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-          JSON
+          cp example_cdk_changesets_json/small-webstack-cdk-diff.json change-set-smoke.json
 
       - name: Composite action smoke test
         uses: ./
         with:
-          diff-json-path: cdk-diff-smoke.json
+          diff-json-path: change-set-smoke.json
           summary-output-path: smoke-summary.md
 
       - name: Verify composite action smoke summary
-        run: grep -q "SmokeFunction" smoke-summary.md
+        run: |
+          grep -q "WebDistributionCFDistributionA1D23A76" smoke-summary.md
+          grep -q "SecurityHeadersPolicy3F6C74E2" smoke-summary.md
 
       - name: Larger example composite action smoke test
         uses: ./
         with:
-          diff-json-path: example_cdk_diff_json/cdk-diff-json-large-realistic.json
+          diff-json-path: example_cdk_changesets_json/large-prod-multistack-cdk-diff.json
           summary-title: CDK diff summary - larger example
           max-changed-fields: "6"
           summary-output-path: large-example-summary.md

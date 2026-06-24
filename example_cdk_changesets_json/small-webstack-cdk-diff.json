@@ -1,0 +1,129 @@
+{
+  "version": "36.0.0",
+  "stacks": {
+    "SampleApp-Dev-WebStack": {
+      "templatePath": "cdk.out/SampleApp-Dev-WebStack.template.json",
+      "changeSet": [
+        {
+          "id": "WebBucketPolicy",
+          "path": "SampleApp-Dev-WebStack/WebBucketPolicy/Resource",
+          "changeType": "Modify",
+          "logicalId": "WebBucketPolicyE3A1B91F",
+          "resourceType": "AWS::S3::BucketPolicy",
+          "replacement": "False",
+          "changeImpact": "Updates CloudFront origin access identity in the bucket policy",
+          "before": {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "s3:GetObject",
+                  "Effect": "Allow",
+                  "Principal": {
+                    "CanonicalUser": "old-origin-access-identity"
+                  },
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Fn::GetAtt": [
+                            "WebBucket",
+                            "Arn"
+                          ]
+                        },
+                        "/*"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "after": {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "s3:GetObject",
+                  "Effect": "Allow",
+                  "Principal": {
+                    "CanonicalUser": "new-origin-access-identity"
+                  },
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        {
+                          "Fn::GetAtt": [
+                            "WebBucket",
+                            "Arn"
+                          ]
+                        },
+                        "/*"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "WebDistribution",
+          "path": "SampleApp-Dev-WebStack/WebDistribution/Resource",
+          "changeType": "Modify",
+          "logicalId": "WebDistributionCFDistributionA1D23A76",
+          "resourceType": "AWS::CloudFront::Distribution",
+          "replacement": "False",
+          "changeImpact": "Updates cache TTLs and attaches a response headers policy",
+          "before": {
+            "DefaultCacheBehavior": {
+              "DefaultTTL": 86400,
+              "MaxTTL": 31536000
+            }
+          },
+          "after": {
+            "DefaultCacheBehavior": {
+              "DefaultTTL": 3600,
+              "MaxTTL": 86400,
+              "ResponseHeadersPolicyId": {
+                "Ref": "SecurityHeadersPolicy3F6C74E2"
+              }
+            }
+          }
+        },
+        {
+          "id": "SecurityHeadersPolicy",
+          "path": "SampleApp-Dev-WebStack/SecurityHeadersPolicy/Resource",
+          "changeType": "Add",
+          "logicalId": "SecurityHeadersPolicy3F6C74E2",
+          "resourceType": "AWS::CloudFront::ResponseHeadersPolicy",
+          "replacement": "N/A",
+          "changeImpact": "Adds HSTS, frame-options and content-type-options headers",
+          "after": {
+            "ResponseHeadersPolicyConfig": {
+              "Name": "sampleapp-dev-security-headers",
+              "SecurityHeadersConfig": {
+                "StrictTransportSecurity": {
+                  "AccessControlMaxAgeSec": 31536000,
+                  "IncludeSubdomains": true,
+                  "Override": true
+                },
+                "ContentTypeOptions": {
+                  "Override": true
+                },
+                "FrameOptions": {
+                  "FrameOption": "DENY",
+                  "Override": true
+                }
+              }
+            }
+          }
+        }
+      ],
+      "securityChanges": {
+        "hasSecurityChanges": true,
+        "permissionsBroadening": []
+      }
+    }
+  }
+}

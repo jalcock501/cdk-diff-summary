@@ -8,76 +8,37 @@ def test_changed_field_truncation() -> None:
     assert format_changed_fields(fields, max_changed_fields=2) == "`A`, `B`, `...`"
 
 
-def test_render_full_markdown_summary(messy_diff: dict) -> None:
+def test_render_full_markdown_summary(large_change_set: dict) -> None:
     markdown = render_summary(
-        parse_diff(messy_diff),
+        parse_diff(large_change_set),
         title="CDK diff summary",
         max_changed_fields=2,
     )
 
     assert "## CDK diff summary" in markdown
-    assert "| Stack changes | 1 |" in markdown
-    assert "| Resource changes | 8 |" in markdown
+    assert "| Stack changes | 6 |" in markdown
+    assert "| Resource changes | 20 |" in markdown
     assert "### Replacements" in markdown
     assert "### Removes" in markdown
     assert "### Adds" in markdown
     assert "### Modifies" in markdown
     assert "### Security group changes" in markdown
-    assert "| Security group changes | 2 |" in markdown
-    assert "oldValue" not in markdown
-    assert "newValue" not in markdown
+    assert "| Security group changes | 3 |" in markdown
+    assert "0.0.0.0/0" not in markdown
+    assert "arn:aws:acm" not in markdown
 
 
-def test_render_security_group_changes_without_before_after_values() -> None:
-    document = {
-        "stacks": [
-            {
-                "stackName": "NetworkStack",
-                "securityGroupChanges": [
-                    {
-                        "securityGroup": "AppSecurityGroup",
-                        "direction": "ingress",
-                        "protocol": "tcp",
-                        "port": 443,
-                        "action": "add",
-                        "old": None,
-                        "new": "10.0.0.0/16",
-                    },
-                    {
-                        "securityGroup": "DatabaseSecurityGroup",
-                        "direction": "ingress",
-                        "protocol": "tcp",
-                        "port": 5432,
-                        "action": "modify",
-                        "old": "10.0.0.0/16",
-                        "new": "10.1.0.0/16",
-                    },
-                    {
-                        "securityGroup": "LegacySecurityGroup",
-                        "direction": "egress",
-                        "protocol": "tcp",
-                        "port": 25,
-                        "action": "delete",
-                        "old": "0.0.0.0/0",
-                        "new": None,
-                    },
-                ],
-            }
-        ]
-    }
-
+def test_render_security_group_changes_without_before_after_values(large_change_set: dict) -> None:
     markdown = render_summary(
-        parse_diff(document),
+        parse_diff(large_change_set),
         title="CDK diff summary",
         max_changed_fields=2,
     )
 
     assert "### Security group changes" in markdown
-    assert "| NetworkStack | AppSecurityGroup | ingress | tcp | 443 | add |" in markdown
-    assert "| NetworkStack | DatabaseSecurityGroup | ingress | tcp | 5432 | modify |" in markdown
-    assert "| NetworkStack | LegacySecurityGroup | egress | tcp | 25 | remove |" in markdown
-    assert "10.0.0.0/16" not in markdown
-    assert "10.1.0.0/16" not in markdown
+    assert (
+        "| SampleApp-Prod-PlatformStack | AlbSecurityGroupIngress80CBE42865 | "
+        "ingress | changed | changed | remove |"
+    ) in markdown
     assert "0.0.0.0/0" not in markdown
-    assert "old" not in markdown
-    assert "new" not in markdown
+    assert "10.0.4.0/24" not in markdown

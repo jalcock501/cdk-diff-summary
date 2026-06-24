@@ -1,0 +1,281 @@
+{
+  "version": "36.0.0",
+  "stacks": {
+    "SampleApp-Test-ApiStack": {
+      "templatePath": "cdk.out/SampleApp-Test-ApiStack.template.json",
+      "changeSet": [
+        {
+          "id": "OrdersTable",
+          "path": "SampleApp-Test-ApiStack/OrdersTable/Resource",
+          "changeType": "Modify",
+          "logicalId": "OrdersTable4E2BC91D",
+          "resourceType": "AWS::DynamoDB::Table",
+          "replacement": "False",
+          "changeImpact": "Enables point-in-time recovery and adds customerId-createdAt GSI",
+          "before": {
+            "BillingMode": "PAY_PER_REQUEST",
+            "PointInTimeRecoverySpecification": {
+              "PointInTimeRecoveryEnabled": false
+            },
+            "GlobalSecondaryIndexes": []
+          },
+          "after": {
+            "BillingMode": "PAY_PER_REQUEST",
+            "PointInTimeRecoverySpecification": {
+              "PointInTimeRecoveryEnabled": true
+            },
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "orderId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "customerId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "createdAt",
+                "AttributeType": "S"
+              }
+            ],
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "customerId-createdAt-index",
+                "KeySchema": [
+                  {
+                    "AttributeName": "customerId",
+                    "KeyType": "HASH"
+                  },
+                  {
+                    "AttributeName": "createdAt",
+                    "KeyType": "RANGE"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "OrderApiFunction",
+          "path": "SampleApp-Test-ApiStack/OrderApiFunction/Resource",
+          "changeType": "Modify",
+          "logicalId": "OrderApiFunction7B9D343F",
+          "resourceType": "AWS::Lambda::Function",
+          "replacement": "False",
+          "changeImpact": "Updates runtime, memory, timeout, asset hash and environment variables",
+          "before": {
+            "Runtime": "python3.11",
+            "MemorySize": 256,
+            "Timeout": 10,
+            "Code": {
+              "S3Key": "asset.2b9a62d4.zip"
+            }
+          },
+          "after": {
+            "Runtime": "python3.12",
+            "MemorySize": 512,
+            "Timeout": 20,
+            "Code": {
+              "S3Key": "asset.a77e4210.zip"
+            },
+            "Environment": {
+              "Variables": {
+                "ORDERS_TABLE_NAME": {
+                  "Ref": "OrdersTable4E2BC91D"
+                },
+                "EVENT_BUS_NAME": {
+                  "Ref": "ApplicationEventBusD91C9820"
+                },
+                "LOG_LEVEL": "DEBUG"
+              }
+            }
+          }
+        },
+        {
+          "id": "OrderApiRoleDefaultPolicy",
+          "path": "SampleApp-Test-ApiStack/OrderApiRoleDefaultPolicy/Resource",
+          "changeType": "Modify",
+          "logicalId": "OrderApiFunctionServiceRoleDefaultPolicy6DAA92CE",
+          "resourceType": "AWS::IAM::Policy",
+          "replacement": "False",
+          "changeImpact": "Broadens Lambda permissions for DynamoDB queries and EventBridge publishing",
+          "before": {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "OrdersTable4E2BC91D",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "after": {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:Query",
+                    "dynamodb:UpdateItem"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "OrdersTable4E2BC91D",
+                        "Arn"
+                      ]
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          {
+                            "Fn::GetAtt": [
+                              "OrdersTable4E2BC91D",
+                              "Arn"
+                            ]
+                          },
+                          "/index/*"
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Action": [
+                    "events:PutEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "ApplicationEventBusD91C9820",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "ApplicationEventBus",
+          "path": "SampleApp-Test-ApiStack/ApplicationEventBus/Resource",
+          "changeType": "Add",
+          "logicalId": "ApplicationEventBusD91C9820",
+          "resourceType": "AWS::Events::EventBus",
+          "replacement": "N/A",
+          "changeImpact": "Adds a dedicated event bus",
+          "after": {
+            "Name": "sampleapp-test-events"
+          }
+        },
+        {
+          "id": "OrderCreatedRule",
+          "path": "SampleApp-Test-ApiStack/OrderCreatedRule/Resource",
+          "changeType": "Add",
+          "logicalId": "OrderCreatedRuleC1F29367",
+          "resourceType": "AWS::Events::Rule",
+          "replacement": "N/A",
+          "changeImpact": "Routes order.created events to SQS",
+          "after": {
+            "EventBusName": {
+              "Ref": "ApplicationEventBusD91C9820"
+            },
+            "EventPattern": {
+              "source": [
+                "sampleapp.orders"
+              ],
+              "detail-type": [
+                "order.created"
+              ]
+            },
+            "Targets": [
+              {
+                "Arn": {
+                  "Fn::GetAtt": [
+                    "OrderProcessingQueue8E115AF3",
+                    "Arn"
+                  ]
+                },
+                "Id": "Target0"
+              }
+            ]
+          }
+        },
+        {
+          "id": "OrderProcessingQueue",
+          "path": "SampleApp-Test-ApiStack/OrderProcessingQueue/Resource",
+          "changeType": "Add",
+          "logicalId": "OrderProcessingQueue8E115AF3",
+          "resourceType": "AWS::SQS::Queue",
+          "replacement": "N/A",
+          "changeImpact": "Adds order processing queue with DLQ redrive policy",
+          "after": {
+            "QueueName": "sampleapp-test-order-processing",
+            "VisibilityTimeout": 60,
+            "RedrivePolicy": {
+              "deadLetterTargetArn": {
+                "Fn::GetAtt": [
+                  "OrderProcessingDLQ99D835A2",
+                  "Arn"
+                ]
+              },
+              "maxReceiveCount": 3
+            }
+          }
+        },
+        {
+          "id": "OrderProcessingDLQ",
+          "path": "SampleApp-Test-ApiStack/OrderProcessingDLQ/Resource",
+          "changeType": "Add",
+          "logicalId": "OrderProcessingDLQ99D835A2",
+          "resourceType": "AWS::SQS::Queue",
+          "replacement": "N/A",
+          "changeImpact": "Adds order processing dead-letter queue",
+          "after": {
+            "QueueName": "sampleapp-test-order-processing-dlq",
+            "MessageRetentionPeriod": 1209600
+          }
+        },
+        {
+          "id": "LegacyWebhookFunction",
+          "path": "SampleApp-Test-ApiStack/LegacyWebhookFunction/Resource",
+          "changeType": "Remove",
+          "logicalId": "LegacyWebhookFunctionD16AD097",
+          "resourceType": "AWS::Lambda::Function",
+          "replacement": "N/A",
+          "changeImpact": "Removes deprecated webhook Lambda",
+          "before": {
+            "Runtime": "nodejs18.x",
+            "Handler": "index.handler",
+            "MemorySize": 128
+          }
+        }
+      ],
+      "securityChanges": {
+        "hasSecurityChanges": true,
+        "permissionsBroadening": [
+          {
+            "resource": "OrderApiFunctionServiceRoleDefaultPolicy6DAA92CE",
+            "type": "IAM::Policy",
+            "reason": "Adds dynamodb:Query, dynamodb:UpdateItem and events:PutEvents"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 name: Parser failure
-description: Report CDK diff JSON that cdk-diff-summary cannot parse correctly.
+description: Report change set JSON that cdk-diff-summary cannot parse correctly.
 title: "Parser failure: "
 labels:
   - bug
@@ -8,9 +8,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping improve CDK diff compatibility.
+        Thanks for helping improve change set compatibility.
 
-        CDK diff JSON can contain sensitive infrastructure values. Please sanitize account IDs, ARNs, hostnames, resource names, secrets, certificates, personal data, and any production identifiers before pasting examples.
+        CloudFormation change set JSON can contain sensitive infrastructure values. Please sanitize account IDs, ARNs, hostnames, resource names, secrets, certificates, personal data, and any production identifiers before pasting examples.
 
   - type: input
     id: cdk-version
@@ -24,9 +24,9 @@ body:
   - type: input
     id: command
     attributes:
-      label: Command used to generate the diff JSON
+      label: Command used to generate the change set JSON
       description: Include flags that affect output shape.
-      placeholder: "npx cdk diff --json > cdk-diff.json"
+      placeholder: "aws cloudformation describe-change-set --stack-name ExampleStack --change-set-name ExampleChangeSet --output json > change-set.json"
     validations:
       required: true
 
@@ -55,23 +55,29 @@ body:
   - type: textarea
     id: sanitized-json
     attributes:
-      label: Sanitized CDK diff JSON shape
+      label: Sanitized change set JSON shape
       description: Paste the smallest sanitized JSON example that reproduces the issue.
       placeholder: |
         {
-          "stacks": [
+          "StackName": "ExampleStack",
+          "Changes": [
             {
-              "stackName": "ExampleStack",
-              "resources": [
-                {
-                  "logicalId": "ExampleResource",
-                  "resourceType": "AWS::Example::Resource",
-                  "action": "modify",
-                  "propertyChanges": [
-                    { "path": "Example.Field", "changeType": "modify" }
-                  ]
-                }
-              ]
+              "Type": "Resource",
+              "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "ExampleResource",
+                "ResourceType": "AWS::Example::Resource",
+                "Replacement": "False",
+                "Details": [
+                  {
+                    "Target": {
+                      "Attribute": "Properties",
+                      "Name": "ExampleField",
+                      "RequiresRecreation": "Never"
+                    }
+                  }
+                ]
+              }
             }
           ]
         }
