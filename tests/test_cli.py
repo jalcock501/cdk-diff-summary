@@ -47,6 +47,25 @@ def test_prints_to_stdout_when_no_output_paths(monkeypatch, capsys, tmp_path: Pa
     assert "Thing" in output
 
 
+def test_prints_to_stdout_when_github_step_summary_env_is_ambient(
+    monkeypatch,
+    capsys,
+    tmp_path: Path,
+) -> None:
+    diff_path = tmp_path / "diff.json"
+    summary_path = tmp_path / "summary.md"
+    write_diff(diff_path)
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_path))
+    monkeypatch.delenv("SUMMARY_OUTPUT_PATH", raising=False)
+
+    assert cli.main([str(diff_path)]) == 0
+
+    output = capsys.readouterr().out
+    assert "## CDK diff summary" in output
+    assert "Thing" in output
+    assert not summary_path.exists()
+
+
 def test_appends_to_output_path(tmp_path: Path) -> None:
     diff_path = tmp_path / "diff.json"
     output_path = tmp_path / "summary.md"
@@ -61,9 +80,8 @@ def test_appends_to_github_step_summary(monkeypatch, tmp_path: Path) -> None:
     summary_path = tmp_path / "summary.md"
     write_diff(diff_path)
     monkeypatch.setenv("DIFF_JSON_PATH", str(diff_path))
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_path))
 
-    assert cli.main([]) == 0
+    assert cli.main(["--github-step-summary", str(summary_path)]) == 0
     assert "## CDK diff summary" in summary_path.read_text(encoding="utf-8")
 
 
@@ -73,11 +91,23 @@ def test_optional_summary_output_path(monkeypatch, tmp_path: Path) -> None:
     output_path = tmp_path / "out.md"
     write_diff(diff_path)
     monkeypatch.setenv("DIFF_JSON_PATH", str(diff_path))
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(step_summary_path))
     monkeypatch.setenv("SUMMARY_OUTPUT_PATH", str(output_path))
 
-    assert cli.main([]) == 0
+    assert cli.main(["--github-step-summary", str(step_summary_path)]) == 0
     assert output_path.read_text(encoding="utf-8") == step_summary_path.read_text(encoding="utf-8")
+
+
+def test_blank_title_suppresses_heading(monkeypatch, capsys, tmp_path: Path) -> None:
+    diff_path = tmp_path / "diff.json"
+    write_diff(diff_path)
+    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+    monkeypatch.delenv("SUMMARY_OUTPUT_PATH", raising=False)
+
+    assert cli.main([str(diff_path), "--title", ""]) == 0
+
+    output = capsys.readouterr().out
+    assert not output.startswith("##")
+    assert "| Metric | Count |" in output
 
 
 def test_cli_arguments_override_environment(monkeypatch, tmp_path: Path) -> None:

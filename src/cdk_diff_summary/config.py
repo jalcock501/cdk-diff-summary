@@ -53,12 +53,14 @@ def load_config() -> Config:
 
     return Config(
         diff_json_path=diff_json_path,
-        summary_title=environ.get("SUMMARY_TITLE", DEFAULT_TITLE) or DEFAULT_TITLE,
+        summary_title=(
+            DEFAULT_TITLE if environ.get("SUMMARY_TITLE") is None else environ["SUMMARY_TITLE"]
+        ),
         max_changed_fields=parse_max_changed_fields(environ.get("MAX_CHANGED_FIELDS")),
         collapse_iam_policies=parse_bool(environ.get("COLLAPSE_IAM_POLICIES"), default=True),
         collapse_assets=parse_bool(environ.get("COLLAPSE_ASSETS"), default=True),
         fail_on_remove=parse_bool(environ.get("FAIL_ON_REMOVE"), default=False),
         fail_on_replace=parse_bool(environ.get("FAIL_ON_REPLACE"), default=False),
         summary_output_path=environ.get("SUMMARY_OUTPUT_PATH", "").strip(),
-        github_step_summary=environ.get("GITHUB_STEP_SUMMARY", "").strip(),
+        github_step_summary="",
     )

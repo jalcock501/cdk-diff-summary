@@ -16,9 +16,12 @@ GROUP_TITLES = (
 
 
 def render_summary(summary: DiffSummary, *, title: str, max_changed_fields: int) -> str:
-    lines = [
-        f"## {escape_markdown(title)}",
-        "",
+    lines = []
+    if title.strip():
+        lines.extend([f"## {escape_markdown(title)}", ""])
+
+    lines.extend(
+        [
         "| Metric | Count |",
         "| --- | ---: |",
         f"| Stack changes | {summary.stack_changes} |",
@@ -30,7 +33,8 @@ def render_summary(summary: DiffSummary, *, title: str, max_changed_fields: int)
         f"| Security group changes | {len(summary.security_group_changes)} |",
         f"| Changes shown below | {len(summary.resources) + len(summary.security_group_changes)} |",
         "",
-    ]
+        ]
+    )
 
     for group, group_title in GROUP_TITLES:
         resources = [resource for resource in summary.resources if resource.group == group]

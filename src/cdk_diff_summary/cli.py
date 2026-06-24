@@ -55,7 +55,7 @@ def parse_args(argv: list[str] | None = None) -> CliConfig:
     )
     parser.add_argument(
         "--title",
-        default=environ.get("SUMMARY_TITLE", DEFAULT_TITLE) or DEFAULT_TITLE,
+        default=DEFAULT_TITLE if environ.get("SUMMARY_TITLE") is None else environ["SUMMARY_TITLE"],
         help="Markdown heading for the summary.",
     )
     parser.add_argument(
@@ -94,7 +94,7 @@ def parse_args(argv: list[str] | None = None) -> CliConfig:
     )
     parser.add_argument(
         "--github-step-summary",
-        default=environ.get("GITHUB_STEP_SUMMARY", "").strip(),
+        default="",
         help="Optional path to append GitHub Step Summary Markdown.",
     )
 
