@@ -1,6 +1,8 @@
 name: Release
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       tag:
@@ -22,11 +24,12 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
 
       - name: Resolve release tag
         id: tag
         env:
-          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           build_tag="$INPUT_TAG"
           release_tag="$(printf '%s' "$build_tag" | sed -E 's/-[0-9]+$//')"
