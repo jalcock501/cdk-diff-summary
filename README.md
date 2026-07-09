@@ -25,6 +25,7 @@ The tool deliberately shows changed field paths only, not before/after values, t
   run: |
     aws cloudformation describe-change-set \
       --stack-name MyStack \
+      --include-property-values \
       --change-set-name pr-${{ github.event.pull_request.number || github.run_id }} \
       --output json > change-set.json
 
@@ -64,6 +65,7 @@ Generate CloudFormation change set JSON:
 ```bash
 aws cloudformation describe-change-set \
   --stack-name MyStack \
+  --include-property-values \
   --change-set-name MyChangeSet \
   --output json > change-set.json
 ```
