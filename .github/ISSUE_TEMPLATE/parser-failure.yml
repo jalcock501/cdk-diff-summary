@@ -26,7 +26,7 @@ body:
     attributes:
       label: Command used to generate the change set JSON
       description: Include flags that affect output shape.
-      placeholder: "aws cloudformation describe-change-set --stack-name ExampleStack --change-set-name ExampleChangeSet --output json > change-set.json"
+      placeholder: "aws cloudformation describe-change-set --stack-name ExampleStack --change-set-name ExampleChangeSet --include-property-values --output json > change-set.json"
     validations:
       required: true
 
